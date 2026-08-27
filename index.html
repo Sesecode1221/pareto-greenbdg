@@ -3,188 +3,740 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GreenBDG | Energy & ESG Intelligence</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <title>GreenBDG | Energy & ESG Intelligence Platform</title>
+    
+    <!-- React & Dependencies - Proper Order -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Recharts CDN -->
     <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.css" rel="stylesheet">
+    
     <style>
+        /* GreenBDG Custom Theme */
         :root {
-            --oe: #059669; /* GreenBDG Primary Green */
-            --lt: #f8fafc; /* Background Light */
-            --te: #1e293b; /* Text Dark */
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #10b981;
+            --bg: #f0fdf4;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #64748b;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
-        body { background-color: var(--lt); font-family: 'Inter', sans-serif; }
-        .sidebar-item:hover { background-color: rgba(5, 150, 105, 0.1); color: var(--oe); }
-        .active-nav { background-color: var(--oe); color: white !important; }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+        }
+
+        .sidebar-item {
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        .sidebar-item:hover {
+            background-color: rgba(5, 150, 105, 0.08);
+            color: var(--primary);
+        }
+
+        .active-nav {
+            background: var(--primary) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
+
+        .card-hover {
+            transition: all 0.3s ease;
+            border: 1px solid var(--border);
+        }
+        .card-hover:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+        }
+
+        .gradient-bg {
+            background: linear-gradient(135deg, #059669 0%, #047857 50%, #065f46 100%);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--primary);
+            border-radius: 10px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary-dark);
+        }
+
+        /* Animation */
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        .animate-slide {
+            animation: slideIn 0.4s ease-out forwards;
+        }
+
+        /* Badge Styles */
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        
+        .badge {
+            padding: 4px 12px;
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+        }
     </style>
 </head>
 <body>
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
-        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } = Recharts;
+        const { useState, useEffect, useMemo, useCallback } = React;
+        const { 
+            BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, 
+            ResponsiveContainer, Cell, PieChart, Pie, Legend,
+            LineChart, Line, AreaChart, Area
+        } = Recharts;
 
-        // --- Mock Data ---
+        // ============================================================
+        // 1. MOCK DATA - Pareto Portfolio Energy Baseline
+        // ============================================================
         const paretoData = [
-            { name: 'HVAC Systems', value: 45, cost: 'R450k', emissions: '120t' },
-            { name: 'Lighting', value: 20, cost: 'R200k', emissions: '50t' },
-            { name: 'Equipment', value: 15, cost: 'R150k', emissions: '40t' },
-            { name: 'Water Heating', value: 12, cost: 'R120k', emissions: '30t' },
-            { name: 'Other', value: 8, cost: 'R80k', emissions: '20t' },
+            { name: 'HVAC Systems', value: 45, cost: 450000, emissions: 120, efficiency: 68, potential: 180000 },
+            { name: 'Lighting', value: 20, cost: 200000, emissions: 50, efficiency: 82, potential: 75000 },
+            { name: 'Equipment', value: 15, cost: 150000, emissions: 40, efficiency: 71, potential: 55000 },
+            { name: 'Water Heating', value: 12, cost: 120000, emissions: 30, efficiency: 64, potential: 45000 },
+            { name: 'Other', value: 8, cost: 80000, emissions: 20, efficiency: 55, potential: 25000 },
         ];
 
-        const portfolioStats = [
-            { id: 1, name: 'Sandton Towers', usage: 'High', efficiency: 'B-', status: 'Action Required' },
-            { id: 2, name: 'Menlyn Park', usage: 'Critical', efficiency: 'D', status: 'Maintenance Alert' },
-            { id: 3, name: 'Cape Quarter', usage: 'Optimal', efficiency: 'A', status: 'Healthy' }
+        const portfolioBuildings = [
+            { id: 1, name: 'Sandton Towers', city: 'Johannesburg', usage: 'High', efficiency: 'B-', status: 'Action Required', energy: 2847, trend: '+5%' },
+            { id: 2, name: 'Menlyn Park', city: 'Pretoria', usage: 'Critical', efficiency: 'D', status: 'Maintenance Alert', energy: 4120, trend: '+12%' },
+            { id: 3, name: 'Cape Quarter', city: 'Cape Town', usage: 'Optimal', efficiency: 'A', status: 'Healthy', energy: 1850, trend: '-3%' },
+            { id: 4, name: 'Umhlanga Ridge', city: 'Durban', usage: 'Moderate', efficiency: 'B+', status: 'Healthy', energy: 2240, trend: '-2%' },
+            { id: 5, name: 'Rosebank Link', city: 'Johannesburg', usage: 'High', efficiency: 'C', status: 'Review Required', energy: 3150, trend: '+8%' },
         ];
 
-        // --- UI Components ---
-        const Card = ({ title, children, subtitle }) => (
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-800">{title}</h3>
-                {subtitle && <p className="text-sm text-slate-500 mb-4">{subtitle}</p>}
-                <div className="mt-4">{children}</div>
+        const monthlyTrend = [
+            { month: 'Jul', energy: 3200, baseline: 3500 },
+            { month: 'Aug', energy: 3100, baseline: 3480 },
+            { month: 'Sep', energy: 3050, baseline: 3460 },
+            { month: 'Oct', energy: 2900, baseline: 3440 },
+            { month: 'Nov', energy: 2850, baseline: 3420 },
+            { month: 'Dec', energy: 2800, baseline: 3400 },
+            { month: 'Jan', energy: 2750, baseline: 3380 },
+            { month: 'Feb', energy: 2847, baseline: 3360 },
+        ];
+
+        const notifications = [
+            { id: 1, type: 'warning', message: 'HVAC efficiency below 70% in Menlyn Park', time: '2 hours ago' },
+            { id: 2, type: 'success', message: 'Sandton Towers achieved 5% energy reduction', time: '5 hours ago' },
+            { id: 3, type: 'info', message: 'New EPC certificate uploaded for Cape Quarter', time: '1 day ago' },
+        ];
+
+        // ============================================================
+        // 2. UI COMPONENTS
+        // ============================================================
+
+        // Card Component
+        const Card = ({ title, children, subtitle, className = '', icon = null, badge = null }) => (
+            <div className={`bg-white p-6 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-all duration-300 ${className}`}>
+                {(title || subtitle || icon || badge) && (
+                    <div className="flex items-start justify-between mb-4">
+                        <div className="flex items-center gap-3">
+                            {icon && <span className="text-2xl">{icon}</span>}
+                            <div>
+                                {title && <h3 className="text-lg font-bold text-slate-800">{title}</h3>}
+                                {subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+                            </div>
+                        </div>
+                        {badge && <span className="badge badge-info">{badge}</span>}
+                    </div>
+                )}
+                <div>{children}</div>
             </div>
         );
 
-        const Sidebar = ({ currentView, setView, role }) => (
-            <div className="w-64 h-screen bg-white border-r border-slate-200 fixed left-0 top-0 p-4">
-                <div className="flex items-center gap-2 mb-10 px-2">
-                    <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
-                        <span className="text-white font-bold text-xl">G</span>
+        // Metric Card
+        const MetricCard = ({ label, value, subtitle, icon, color = 'emerald', trend = null }) => {
+            const colors = {
+                emerald: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                blue: 'bg-blue-50 text-blue-700 border-blue-200',
+                purple: 'bg-purple-50 text-purple-700 border-purple-200',
+                amber: 'bg-amber-50 text-amber-700 border-amber-200',
+                red: 'bg-red-50 text-red-700 border-red-200',
+            };
+            return (
+                <div className={`p-6 rounded-xl border ${colors[color] || colors.emerald}`}>
+                    <div className="flex items-center justify-between">
+                        <span className="text-3xl">{icon}</span>
+                        {trend && (
+                            <span className={`text-sm font-bold ${trend.startsWith('+') ? 'text-red-600' : 'text-emerald-600'}`}>
+                                {trend}
+                            </span>
+                        )}
                     </div>
-                    <span className="font-bold text-xl text-slate-800 tracking-tight">GreenBDG</span>
+                    <p className="text-3xl font-bold mt-3">{value}</p>
+                    <p className="text-sm opacity-80 mt-1">{label}</p>
+                    {subtitle && <p className="text-xs opacity-60 mt-1">{subtitle}</p>}
                 </div>
-                
-                <nav className="space-y-1">
-                    {[
-                        { id: 'overview', label: 'Overview', icon: 'layout-dashboard' },
-                        { id: 'pareto', label: 'Pareto Analytics', icon: 'pie-chart' },
-                        { id: 'onboarding', label: 'Setup & Data', icon: 'plus-circle' },
-                        { id: 'reports', label: 'ESG Reports', icon: 'file-text' }
-                    ].map(item => (
-                        <button 
-                            key={item.id}
-                            onClick={() => setView(item.id)}
-                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${currentView === item.id ? 'active-nav' : 'text-slate-600 sidebar-item'}`}
-                        >
-                            <span>{item.label}</span>
-                        </button>
-                    ))}
-                </nav>
+            );
+        };
 
-                <div className="absolute bottom-8 left-4 right-4 bg-slate-50 p-4 rounded-xl">
-                    <p className="text-xs text-slate-500 mb-1">Signed in as:</p>
-                    <p className="text-sm font-bold text-slate-800 truncate">{role}</p>
-                </div>
-            </div>
-        );
+        // Sidebar Component
+        const Sidebar = ({ currentView, setView, role, setRole }) => {
+            const menuItems = [
+                { id: 'overview', label: 'Overview', icon: '📊' },
+                { id: 'pareto', label: 'Pareto Analytics', icon: '📈' },
+                { id: 'buildings', label: 'Buildings', icon: '🏢' },
+                { id: 'onboarding', label: 'Setup & Data', icon: '⚙️' },
+                { id: 'reports', label: 'ESG Reports', icon: '📄' },
+                { id: 'whatsapp', label: 'WhatsApp Assistant', icon: '💬' },
+            ];
 
-        // --- Pages ---
-        const ParetoDashboard = ({ role }) => (
-            <div className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-xl">
-                        <p className="text-emerald-700 text-sm font-semibold uppercase tracking-wider">Top Efficiency Gap</p>
-                        <h2 className="text-3xl font-black text-emerald-900 mt-2">HVAC Systems</h2>
-                        <p className="text-emerald-600 text-sm mt-1">Responsible for 45% of total spend.</p>
+            return (
+                <div className="w-64 h-screen bg-white border-r border-slate-200 fixed left-0 top-0 z-50 flex flex-col">
+                    {/* Logo */}
+                    <div className="p-6 border-b border-slate-100">
+                        <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 gradient-bg rounded-xl flex items-center justify-center shadow-lg shadow-emerald-200">
+                                <span className="text-white font-black text-xl">G</span>
+                            </div>
+                            <div>
+                                <span className="font-bold text-xl text-slate-800 tracking-tight block">GreenBDG</span>
+                                <span className="text-xs text-slate-500">Africa Platform</span>
+                            </div>
+                        </div>
                     </div>
-                    <div className="bg-slate-800 p-6 rounded-xl text-white">
-                        <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Annual Saving Opportunity</p>
-                        <h2 className="text-3xl font-black text-white mt-2">R1.2M</h2>
-                        <p className="text-slate-400 text-sm mt-1">Based on Pareto optimization.</p>
-                    </div>
-                    <div className="bg-white border border-slate-200 p-6 rounded-xl">
-                        <p className="text-slate-500 text-sm font-semibold uppercase tracking-wider">Data Confidence Score</p>
-                        <h2 className="text-3xl font-black text-slate-800 mt-2">82%</h2>
-                        <div className="w-full bg-slate-100 h-2 mt-3 rounded-full overflow-hidden">
-                            <div className="bg-emerald-500 h-full w-[82%]"></div>
+
+                    {/* Navigation */}
+                    <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+                        {menuItems.map(item => (
+                            <button
+                                key={item.id}
+                                onClick={() => setView(item.id)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all duration-200 sidebar-item ${
+                                    currentView === item.id ? 'active-nav' : 'text-slate-600 hover:bg-emerald-50'
+                                }`}
+                            >
+                                <span className="text-lg">{item.icon}</span>
+                                <span>{item.label}</span>
+                                {item.id === 'pareto' && (
+                                    <span className="ml-auto text-[10px] bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full font-bold">NEW</span>
+                                )}
+                            </button>
+                        ))}
+                    </nav>
+
+                    {/* User Section */}
+                    <div className="p-4 border-t border-slate-100">
+                        <div className="bg-slate-50 rounded-xl p-4">
+                            <p className="text-xs text-slate-500 font-medium uppercase tracking-wider mb-2">Signed in as</p>
+                            <div className="flex items-center gap-3">
+                                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm">
+                                    {role.split(' ').map(w => w[0]).join('')}
+                                </div>
+                                <div className="flex-1 min-w-0">
+                                    <p className="text-sm font-bold text-slate-800 truncate">{role}</p>
+                                    <p className="text-xs text-slate-500 truncate">African Property Holdings</p>
+                                </div>
+                            </div>
+                            <select
+                                className="w-full mt-3 bg-white border border-slate-200 px-3 py-2 rounded-lg text-sm font-medium outline-none focus:ring-2 focus:ring-emerald-500"
+                                onChange={(e) => setRole(e.target.value)}
+                                value={role}
+                            >
+                                <option>Portfolio Manager</option>
+                                <option>CFO</option>
+                                <option>Sustainability Lead</option>
+                                <option>Building Manager</option>
+                                <option>Facilities Manager</option>
+                                <option>Tenant Admin</option>
+                            </select>
                         </div>
                     </div>
                 </div>
+            );
+        };
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    <Card title="Energy Consumption by Subsystem" subtitle="Pareto Principle: 80% of energy usage is driven by these core systems.">
-                        <div className="h-[300px]">
-                            <ResponsiveContainer width="100%" height="100%">
-                                <BarChart data={paretoData}>
-                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
-                                    <XAxis dataKey="name" />
-                                    <YAxis />
-                                    <Tooltip />
-                                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
-                                        {paretoData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#059669' : '#94a3b8'} />
-                                        ))}
-                                    </Bar>
-                                </BarChart>
-                            </ResponsiveContainer>
+        // ============================================================
+        // 3. PAGE COMPONENTS
+        // ============================================================
+
+        // Overview Page
+        const OverviewPage = ({ role, buildings = portfolioBuildings }) => {
+            const totalEnergy = buildings.reduce((sum, b) => sum + b.energy, 0);
+            const avgEfficiency = buildings.reduce((sum, b) => {
+                const scores = { 'A': 100, 'A-': 90, 'B+': 85, 'B': 80, 'B-': 75, 'C+': 70, 'C': 65, 'D': 50 };
+                return sum + (scores[b.efficiency] || 50);
+            }, 0) / buildings.length;
+
+            return (
+                <div className="space-y-6 animate-slide">
+                    {/* Role-specific greeting */}
+                    <div className="gradient-bg rounded-2xl p-8 text-white">
+                        <div className="flex items-center justify-between flex-wrap gap-4">
+                            <div>
+                                <h1 className="text-2xl font-bold">Welcome back, {role}</h1>
+                                <p className="text-emerald-100 mt-1">
+                                    {role === 'CFO' ? 'Total portfolio value: R4.2B · NOI: R312M' :
+                                     role === 'Sustainability Lead' ? 'Total emissions: 15,420 tCO2e · 38 certifications' :
+                                     '6 buildings · 92% occupancy · B+ avg EPC'}
+                                </p>
+                            </div>
+                            <button className="bg-white/20 backdrop-blur-sm px-6 py-3 rounded-xl font-bold hover:bg-white/30 transition">
+                                {role === 'CFO' ? '📊 Export Financials' : 
+                                 role === 'Sustainability Lead' ? '🌿 Generate ESG Report' :
+                                 '📋 View All Buildings'}
+                            </button>
+                        </div>
+                    </div>
+
+                    {/* Metrics Grid */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <MetricCard label="Total Buildings" value={buildings.length} icon="🏢" color="emerald" />
+                        <MetricCard label="Avg Energy (kWh)" value={totalEnergy.toLocaleString()} icon="⚡" color="blue" trend="-5.2%" />
+                        <MetricCard label="Avg EPC Rating" value={`${(avgEfficiency / 20).toFixed(0)}%`} icon="⭐" color="purple" trend="+8%" />
+                        <MetricCard label="Action Items" value={buildings.filter(b => b.status !== 'Healthy').length} icon="⚠️" color="amber" />
+                    </div>
+
+                    {/* Building Performance Table */}
+                    <Card title="Building Performance Snapshot" icon="🏗️" badge="Live Data">
+                        <div className="overflow-x-auto">
+                            <table className="w-full text-left">
+                                <thead>
+                                    <tr className="border-b border-slate-100">
+                                        <th className="pb-3 text-xs text-slate-400 font-bold uppercase tracking-wider">Building</th>
+                                        <th className="pb-3 text-xs text-slate-400 font-bold uppercase tracking-wider">City</th>
+                                        <th className="pb-3 text-xs text-slate-400 font-bold uppercase tracking-wider">Energy (kWh)</th>
+                                        <th className="pb-3 text-xs text-slate-400 font-bold uppercase tracking-wider">EPC</th>
+                                        <th className="pb-3 text-xs text-slate-400 font-bold uppercase tracking-wider">Status</th>
+                                        <th className="pb-3 text-xs text-slate-400 font-bold uppercase tracking-wider">Trend</th>
+                                    </tr>
+                                </thead>
+                                <tbody className="divide-y divide-slate-50">
+                                    {buildings.map(site => (
+                                        <tr key={site.id} className="hover:bg-emerald-50/50 transition">
+                                            <td className="py-3 font-semibold text-slate-800">{site.name}</td>
+                                            <td className="py-3 text-slate-500 text-sm">{site.city}</td>
+                                            <td className="py-3 font-mono font-bold">{site.energy.toLocaleString()}</td>
+                                            <td className="py-3">
+                                                <span className={`px-2 py-1 rounded-full text-xs font-bold ${
+                                                    site.efficiency.startsWith('A') ? 'bg-emerald-100 text-emerald-700' :
+                                                    site.efficiency.startsWith('B') ? 'bg-blue-100 text-blue-700' :
+                                                    site.efficiency.startsWith('C') ? 'bg-amber-100 text-amber-700' :
+                                                    'bg-red-100 text-red-700'
+                                                }`}>
+                                                    {site.efficiency}
+                                                </span>
+                                            </td>
+                                            <td className="py-3">
+                                                <span className={`badge ${
+                                                    site.status === 'Healthy' ? 'badge-success' :
+                                                    site.status === 'Action Required' ? 'badge-warning' :
+                                                    site.status === 'Maintenance Alert' ? 'badge-danger' :
+                                                    'badge-info'
+                                                }`}>
+                                                    {site.status}
+                                                </span>
+                                            </td>
+                                            <td className="py-3">
+                                                <span className={`text-sm font-bold ${site.trend.startsWith('+') ? 'text-red-600' : 'text-emerald-600'}`}>
+                                                    {site.trend}
+                                                </span>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </Card>
 
-                    <Card title={role === 'CFO' ? 'Financial Impact' : 'Carbon Footprint Breakdown'}>
-                        <div className="h-[300px]">
+                    {/* Energy Trend Chart */}
+                    <Card title="Energy Consumption Trend" subtitle="Last 8 months vs baseline" icon="📉">
+                        <div className="h-[250px]">
                             <ResponsiveContainer width="100%" height="100%">
-                                <PieChart>
-                                    <Pie data={paretoData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label>
-                                        {paretoData.map((entry, index) => (
-                                            <Cell key={`cell-${index}`} fill={['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'][index]} />
-                                        ))}
-                                    </Pie>
-                                    <Tooltip />
-                                </PieChart>
+                                <AreaChart data={monthlyTrend}>
+                                    <defs>
+                                        <linearGradient id="energyGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#059669" stopOpacity={0.3}/>
+                                            <stop offset="95%" stopColor="#059669" stopOpacity={0}/>
+                                        </linearGradient>
+                                        <linearGradient id="baselineGradient" x1="0" y1="0" x2="0" y2="1">
+                                            <stop offset="5%" stopColor="#94a3b8" stopOpacity={0.15}/>
+                                            <stop offset="95%" stopColor="#94a3b8" stopOpacity={0}/>
+                                        </linearGradient>
+                                    </defs>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#e2e8f0" />
+                                    <XAxis dataKey="month" stroke="#94a3b8" fontSize={12} />
+                                    <YAxis stroke="#94a3b8" fontSize={12} />
+                                    <Tooltip 
+                                        contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                    />
+                                    <Area type="monotone" dataKey="baseline" stroke="#94a3b8" strokeDasharray="5 5" fill="url(#baselineGradient)" />
+                                    <Area type="monotone" dataKey="energy" stroke="#059669" fill="url(#energyGradient)" strokeWidth={3} />
+                                </AreaChart>
                             </ResponsiveContainer>
                         </div>
-                        <div className="mt-4 grid grid-cols-2 gap-4">
-                            {paretoData.slice(0, 2).map(item => (
-                                <div key={item.name} className="p-3 bg-slate-50 rounded-lg">
-                                    <p className="text-xs text-slate-500 uppercase font-bold">{item.name}</p>
-                                    <p className="text-lg font-bold text-slate-800">{role === 'CFO' ? item.cost : item.emissions}</p>
+                    </Card>
+                </div>
+            );
+        };
+
+        // Pareto Analytics Page
+        const ParetoDashboard = ({ role }) => {
+            const totalCost = paretoData.reduce((sum, d) => sum + d.cost, 0);
+            const totalPotential = paretoData.reduce((sum, d) => sum + d.potential, 0);
+            const totalEmissions = paretoData.reduce((sum, d) => sum + d.emissions, 0);
+
+            return (
+                <div className="space-y-6 animate-slide">
+                    {/* Header */}
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-800">⚡ Pareto Analysis Engine</h1>
+                            <p className="text-slate-500 text-sm">80/20 Rule: Focus on the vital few systems driving energy consumption</p>
+                        </div>
+                        <button className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-emerald-700 transition shadow-lg shadow-emerald-200">
+                            🔄 Run New Analysis
+                        </button>
+                    </div>
+
+                    {/* KPI Cards */}
+                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <MetricCard label="Total Energy" value={`${paretoData.reduce((s, d) => s + d.value, 0)}%`} icon="⚡" color="emerald" />
+                        <MetricCard 
+                            label="Annual Cost" 
+                            value={`R${(totalCost / 1000).toFixed(0)}k`} 
+                            icon="💰" 
+                            color="blue" 
+                            trend={`-${Math.round((totalPotential / totalCost) * 100)}% potential`}
+                        />
+                        <MetricCard 
+                            label="CO₂ Emissions" 
+                            value={`${totalEmissions.toFixed(0)}t`} 
+                            icon="🌿" 
+                            color="purple" 
+                            trend="-18% YoY"
+                        />
+                        <MetricCard 
+                            label="Savings Opportunity" 
+                            value={`R${(totalPotential / 1000).toFixed(0)}k`} 
+                            icon="🎯" 
+                            color="amber" 
+                            trend="+12% identified"
+                        />
+                    </div>
+
+                    {/* Charts */}
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        {/* Pareto Bar Chart */}
+                        <Card 
+                            title="Energy Consumption by Subsystem" 
+                            subtitle="Pareto Principle: 80% of energy usage is driven by core systems"
+                            icon="📊"
+                            badge="Pareto 80/20"
+                        >
+                            <div className="h-[280px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <BarChart data={paretoData} layout="vertical">
+                                        <CartesianGrid strokeDasharray="3 3" horizontal={true} vertical={false} />
+                                        <XAxis type="number" domain={[0, 100]} />
+                                        <YAxis dataKey="name" type="category" width={100} />
+                                        <Tooltip 
+                                            formatter={(value, name, props) => {
+                                                if (name === 'value') return [`${value}%`, 'Consumption'];
+                                                return [value, name];
+                                            }}
+                                            contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                        />
+                                        <Bar dataKey="value" radius={[0, 4, 4, 0]}>
+                                            {paretoData.map((entry, index) => (
+                                                <Cell 
+                                                    key={`cell-${index}`} 
+                                                    fill={index === 0 ? '#059669' : index === 1 ? '#10b981' : '#6ee7b7'} 
+                                                />
+                                            ))}
+                                        </Bar>
+                                    </BarChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="mt-4 flex items-center justify-between text-sm text-slate-500">
+                                <span>💡 {paretoData[0].name} drives {paretoData[0].value}% of consumption</span>
+                                <span className="font-bold text-emerald-600">Optimization potential: R{(paretoData[0].potential / 1000).toFixed(0)}k</span>
+                            </div>
+                        </Card>
+
+                        {/* Pie Chart & Breakdown */}
+                        <Card 
+                            title={role === 'CFO' ? 'Financial Impact by System' : 'Carbon Footprint Breakdown'} 
+                            subtitle={role === 'CFO' ? 'Annual cost distribution' : 'Emissions by subsystem'}
+                            icon={role === 'CFO' ? '💰' : '🌿'}
+                        >
+                            <div className="h-[280px]">
+                                <ResponsiveContainer width="100%" height="100%">
+                                    <PieChart>
+                                        <Pie
+                                            data={paretoData}
+                                            dataKey={role === 'CFO' ? 'cost' : 'emissions'}
+                                            nameKey="name"
+                                            cx="50%"
+                                            cy="45%"
+                                            outerRadius={90}
+                                            label={({ name, percent }) => `${name} ${(percent * 100).toFixed(0)}%`}
+                                            labelLine={false}
+                                        >
+                                            {paretoData.map((entry, index) => (
+                                                <Cell 
+                                                    key={`cell-${index}`} 
+                                                    fill={['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'][index]} 
+                                                />
+                                            ))}
+                                        </Pie>
+                                        <Tooltip 
+                                            formatter={(value) => {
+                                                if (typeof value === 'number') {
+                                                    return role === 'CFO' ? `R${(value / 1000).toFixed(0)}k` : `${value}t CO₂e`;
+                                                }
+                                                return value;
+                                            }}
+                                            contentStyle={{ background: 'white', border: 'none', borderRadius: '12px', boxShadow: '0 4px 12px rgba(0,0,0,0.1)' }}
+                                        />
+                                    </PieChart>
+                                </ResponsiveContainer>
+                            </div>
+                            <div className="mt-2 grid grid-cols-2 gap-2">
+                                {paretoData.slice(0, 4).map(item => (
+                                    <div key={item.name} className="flex items-center justify-between p-2 bg-slate-50 rounded-lg text-sm">
+                                        <span className="text-slate-600">{item.name}</span>
+                                        <span className="font-bold text-slate-800">
+                                            {role === 'CFO' ? `R${(item.cost / 1000).toFixed(0)}k` : `${item.emissions}t`}
+                                        </span>
+                                    </div>
+                                ))}
+                            </div>
+                        </Card>
+                    </div>
+
+                    {/* Recommendations */}
+                    <Card title="💡 AI-Powered Recommendations" icon="🧠" badge="4 Insights">
+                        <div className="space-y-3">
+                            {paretoData.slice(0, 3).map((item, index) => (
+                                <div key={index} className="flex items-start gap-4 p-4 bg-gradient-to-r from-emerald-50 to-transparent rounded-xl border border-emerald-100">
+                                    <div className={`w-8 h-8 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                                        index === 0 ? 'bg-emerald-600' : 'bg-emerald-400'
+                                    }`}>
+                                        {index + 1}
+                                    </div>
+                                    <div className="flex-1">
+                                        <p className="font-semibold text-slate-800">
+                                            {index === 0 && `Optimize ${item.name} performance`}
+                                            {index === 1 && `Upgrade ${item.name} systems`}
+                                            {index === 2 && `Implement smart controls for ${item.name}`}
+                                        </p>
+                                        <p className="text-sm text-slate-500">
+                                            {index === 0 && `Potential savings: R${(item.potential / 1000).toFixed(0)}k · Efficiency: ${item.efficiency}%`}
+                                            {index === 1 && `Reduce energy waste by up to ${Math.round(item.value * 0.15)}% · ROI: 18 months`}
+                                            {index === 2 && `Automated scheduling can save ${Math.round(item.value * 0.1)}% · Payback: 12 months`}
+                                        </p>
+                                    </div>
+                                    <button className="text-emerald-600 font-bold text-sm hover:underline">
+                                        View Plan →
+                                    </button>
                                 </div>
                             ))}
                         </div>
                     </Card>
                 </div>
+            );
+        };
+
+        // Buildings Page
+        const BuildingsPage = ({ buildings = portfolioBuildings }) => (
+            <div className="space-y-6 animate-slide">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-800">🏢 Portfolio Buildings</h1>
+                        <p className="text-slate-500 text-sm">Manage your entire building portfolio</p>
+                    </div>
+                    <button className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-emerald-700 transition">
+                        + Add Building
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {buildings.map(building => (
+                        <div key={building.id} className="bg-white rounded-xl border border-slate-200 p-6 hover:shadow-lg transition-all duration-300 card-hover">
+                            <div className="flex items-start justify-between">
+                                <div>
+                                    <h3 className="font-bold text-slate-800">{building.name}</h3>
+                                    <p className="text-sm text-slate-500">{building.city}</p>
+                                </div>
+                                <span className={`badge ${
+                                    building.status === 'Healthy' ? 'badge-success' :
+                                    building.status === 'Action Required' ? 'badge-warning' :
+                                    'badge-danger'
+                                }`}>
+                                    {building.status}
+                                </span>
+                            </div>
+                            <div className="mt-4 grid grid-cols-2 gap-2">
+                                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                                    <p className="text-xs text-slate-500">Energy</p>
+                                    <p className="font-bold text-slate-800">{building.energy.toLocaleString()} kWh</p>
+                                </div>
+                                <div className="bg-slate-50 rounded-lg p-3 text-center">
+                                    <p className="text-xs text-slate-500">EPC</p>
+                                    <p className="font-bold text-slate-800">{building.efficiency}</p>
+                                </div>
+                            </div>
+                            <button className="w-full mt-4 text-emerald-600 font-bold text-sm hover:underline">
+                                View Details →
+                            </button>
+                        </div>
+                    ))}
+                </div>
             </div>
         );
 
+        // Onboarding Flow
         const OnboardingFlow = () => {
             const [step, setStep] = useState(1);
+            const [buildingName, setBuildingName] = useState('');
+            const [fileUploaded, setFileUploaded] = useState(false);
+
             return (
-                <div className="max-w-2xl mx-auto mt-10">
-                    <Card title="Building Onboarding" subtitle={`Step ${step} of 3: Initialize your portfolio`}>
+                <div className="max-w-2xl mx-auto animate-slide">
+                    <Card title="🏗️ Building Onboarding" subtitle={`Step ${step} of 3: Initialize your portfolio`}>
                         {step === 1 && (
                             <div className="space-y-4">
                                 <label className="block text-sm font-medium text-slate-700">Portfolio Name</label>
-                                <input type="text" className="w-full p-3 border rounded-lg focus:ring-2 ring-emerald-500 outline-none" placeholder="e.g. Growthpoint Premium Portfolio" />
-                                <button onClick={() => setStep(2)} className="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">Continue</button>
+                                <input 
+                                    type="text" 
+                                    className="w-full p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition" 
+                                    placeholder="e.g. African Property Holdings Portfolio"
+                                    value={buildingName}
+                                    onChange={(e) => setBuildingName(e.target.value)}
+                                />
+                                <button 
+                                    onClick={() => setStep(2)} 
+                                    className="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition"
+                                    disabled={!buildingName}
+                                >
+                                    Continue →
+                                </button>
                             </div>
                         )}
                         {step === 2 && (
                             <div className="space-y-4">
-                                <div className="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center">
-                                    <p className="text-slate-500 mb-4">Upload energy data (CSV, XLSX) or link smart meters</p>
-                                    <button className="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm">Select Files</button>
+                                <div 
+                                    className={`border-2 border-dashed rounded-xl p-10 text-center transition ${
+                                        fileUploaded ? 'border-emerald-500 bg-emerald-50' : 'border-slate-300 hover:border-emerald-400'
+                                    }`}
+                                >
+                                    {fileUploaded ? (
+                                        <div className="space-y-2">
+                                            <span className="text-4xl">✅</span>
+                                            <p className="text-emerald-600 font-bold">portfolio_data.xlsx uploaded</p>
+                                            <p className="text-sm text-slate-500">12 buildings detected</p>
+                                            <button 
+                                                onClick={() => setFileUploaded(false)}
+                                                className="text-sm text-slate-400 hover:text-red-500"
+                                            >
+                                                Remove file
+                                            </button>
+                                        </div>
+                                    ) : (
+                                        <div className="space-y-3">
+                                            <span className="text-5xl block">📁</span>
+                                            <p className="text-slate-600 font-medium">Upload energy data (CSV, XLSX)</p>
+                                            <p className="text-sm text-slate-400">or link smart meters directly</p>
+                                            <button 
+                                                onClick={() => setFileUploaded(true)}
+                                                className="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm font-bold hover:bg-slate-700 transition"
+                                            >
+                                                Select Files
+                                            </button>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold">Back</button>
-                                    <button onClick={() => setStep(3)} className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-bold">Process Pareto Analysis</button>
+                                    <button onClick={() => setStep(1)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold hover:bg-slate-200 transition">
+                                        Back
+                                    </button>
+                                    <button 
+                                        onClick={() => setStep(3)} 
+                                        className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition"
+                                        disabled={!fileUploaded}
+                                    >
+                                        {fileUploaded ? 'Process Pareto Analysis →' : 'Upload data to continue'}
+                                    </button>
                                 </div>
                             </div>
                         )}
                         {step === 3 && (
                             <div className="text-center py-10">
-                                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
-                                    <span className="text-2xl font-bold">✓</span>
+                                <div className="w-20 h-20 bg-emerald-100 rounded-full flex items-center justify-center mx-auto mb-6">
+                                    <span className="text-4xl">✅</span>
                                 </div>
-                                <h2 className="text-xl font-bold mb-2">Analysis Complete</h2>
-                                <p className="text-slate-500 mb-6">We've identified R1.2M in potential savings across 12 buildings.</p>
-                                <button onClick={() => window.location.reload()} className="bg-emerald-600 text-white px-8 py-3 rounded-lg font-bold">View My Dashboard</button>
+                                <h2 className="text-2xl font-bold mb-3">Analysis Complete!</h2>
+                                <p className="text-slate-500 max-w-md mx-auto mb-6">
+                                    We've identified <span className="font-bold text-emerald-600">R1.2M</span> in potential savings across 
+                                    <span className="font-bold"> {buildingName || '12'}</span> buildings.
+                                </p>
+                                <div className="bg-emerald-50 p-4 rounded-xl max-w-sm mx-auto text-left space-y-2">
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-600">HVAC Optimization</span>
+                                        <span className="font-bold text-emerald-700">R180k savings</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-600">Lighting Retrofit</span>
+                                        <span className="font-bold text-emerald-700">R75k savings</span>
+                                    </div>
+                                    <div className="flex justify-between text-sm">
+                                        <span className="text-slate-600">Equipment Efficiency</span>
+                                        <span className="font-bold text-emerald-700">R55k savings</span>
+                                    </div>
+                                </div>
+                                <div className="flex gap-4 mt-6">
+                                    <button 
+                                        onClick={() => window.location.reload()} 
+                                        className="flex-1 bg-emerald-600 text-white px-8 py-3 rounded-lg font-bold hover:bg-emerald-700 transition"
+                                    >
+                                        View My Dashboard
+                                    </button>
+                                    <button className="flex-1 bg-white border border-slate-200 px-8 py-3 rounded-lg font-bold hover:bg-slate-50 transition">
+                                        Export Report
+                                    </button>
+                                </div>
                             </div>
                         )}
                     </Card>
@@ -192,91 +744,268 @@
             );
         };
 
-        // --- Main App ---
+        // Reports Page
+        const ReportsPage = () => (
+            <div className="space-y-6 animate-slide">
+                <div className="flex items-center justify-between">
+                    <div>
+                        <h1 className="text-2xl font-bold text-slate-800">📄 ESG Reports</h1>
+                        <p className="text-slate-500 text-sm">Generate and manage sustainability reports</p>
+                    </div>
+                    <button className="bg-emerald-600 text-white px-6 py-2.5 rounded-lg font-bold hover:bg-emerald-700 transition">
+                        + Generate New Report
+                    </button>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover">
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className="text-2xl">🌿</span>
+                            <div>
+                                <h3 className="font-bold">Annual ESG Report 2025</h3>
+                                <p className="text-xs text-slate-500">Last updated: Dec 2025</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="badge badge-success">Completed</span>
+                            <button className="text-emerald-600 font-bold hover:underline">Download PDF</button>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover">
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className="text-2xl">⚡</span>
+                            <div>
+                                <h3 className="font-bold">Energy Performance Report</h3>
+                                <p className="text-xs text-slate-500">Q4 2025</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="badge badge-warning">In Progress</span>
+                            <button className="text-emerald-600 font-bold hover:underline">Continue</button>
+                        </div>
+                    </div>
+                    <div className="bg-white rounded-xl border border-slate-200 p-6 card-hover">
+                        <div className="flex items-center gap-3 mb-4">
+                            <span className="text-2xl">🏆</span>
+                            <div>
+                                <h3 className="font-bold">GRESB Submission 2026</h3>
+                                <p className="text-xs text-slate-500">Due: Jun 2026</p>
+                            </div>
+                        </div>
+                        <div className="flex items-center justify-between text-sm">
+                            <span className="badge badge-info">Not Started</span>
+                            <button className="text-emerald-600 font-bold hover:underline">Start</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        );
+
+        // WhatsApp Page
+        const WhatsAppPage = () => {
+            const [messages, setMessages] = useState([
+                { id: 1, sender: 'bot', text: '👋 Hi! I\'m your GreenBDG Assistant. I can help with:\n• Energy usage reports\n• Pareto analysis\n• Building status\n• Optimization tips', time: 'Just now' }
+            ]);
+            const [input, setInput] = useState('');
+            const [isConnected, setIsConnected] = useState(false);
+
+            const sendMessage = () => {
+                if (!input.trim()) return;
+                setMessages(prev => [...prev, { id: Date.now(), sender: 'user', text: input, time: 'Just now' }]);
+                setInput('');
+                // Simulate bot response
+                setTimeout(() => {
+                    const responses = [
+                        '📊 Sandton Towers: 2,847 kWh today (-5% vs yesterday)',
+                        '💡 Pareto analysis shows HVAC systems are your biggest opportunity.',
+                        '🏢 Menlyn Park: Maintenance alert - HVAC efficiency below 70%.',
+                        '🌿 Cape Quarter: Achieved 92% occupancy with A EPC rating!'
+                    ];
+                    setMessages(prev => [...prev, { 
+                        id: Date.now() + 1, 
+                        sender: 'bot', 
+                        text: responses[Math.floor(Math.random() * responses.length)],
+                        time: 'Just now' 
+                    }]);
+                }, 1000);
+            };
+
+            return (
+                <div className="space-y-6 animate-slide h-[calc(100vh-200px)] flex flex-col">
+                    <div className="flex items-center justify-between">
+                        <div>
+                            <h1 className="text-2xl font-bold text-slate-800">💬 WhatsApp Assistant</h1>
+                            <p className="text-slate-500 text-sm">Chat with your building data in real-time</p>
+                        </div>
+                        <button 
+                            onClick={() => setIsConnected(!isConnected)}
+                            className={`px-6 py-2.5 rounded-lg font-bold transition ${
+                                isConnected ? 'bg-emerald-100 text-emerald-700' : 'bg-emerald-600 text-white hover:bg-emerald-700'
+                            }`}
+                        >
+                            {isConnected ? '✅ Connected' : '🔗 Link WhatsApp'}
+                        </button>
+                    </div>
+
+                    <div className="flex-1 bg-white rounded-xl border border-slate-200 flex flex-col overflow-hidden">
+                        {/* Messages Area */}
+                        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+                            {messages.map(msg => (
+                                <div key={msg.id} className={`flex ${msg.sender === 'user' ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`max-w-[80%] p-4 rounded-xl ${
+                                        msg.sender === 'user' 
+                                            ? 'bg-emerald-600 text-white rounded-br-none' 
+                                            : 'bg-slate-100 text-slate-800 rounded-bl-none'
+                                    }`}>
+                                        <p className="whitespace-pre-wrap">{msg.text}</p>
+                                        <p className={`text-xs mt-1 ${msg.sender === 'user' ? 'text-emerald-200' : 'text-slate-400'}`}>
+                                            {msg.time}
+                                        </p>
+                                    </div>
+                                </div>
+                            ))}
+                        </div>
+
+                        {/* Input Area */}
+                        <div className="border-t border-slate-200 p-4">
+                            <div className="flex gap-3">
+                                <input
+                                    type="text"
+                                    className="flex-1 p-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 outline-none transition"
+                                    placeholder="Ask about your buildings, energy, or Pareto..."
+                                    value={input}
+                                    onChange={(e) => setInput(e.target.value)}
+                                    onKeyPress={(e) => e.key === 'Enter' && sendMessage()}
+                                />
+                                <button 
+                                    onClick={sendMessage}
+                                    className="bg-emerald-600 text-white px-6 rounded-lg font-bold hover:bg-emerald-700 transition"
+                                >
+                                    Send
+                                </button>
+                            </div>
+                            <p className="text-xs text-slate-400 mt-2">
+                                💡 Try: "energy Sandton Towers" or "pareto Menlyn Park" or "help"
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            );
+        };
+
+        // ============================================================
+        // 4. NOTIFICATIONS COMPONENT
+        // ============================================================
+        const NotificationsDropdown = ({ notifications }) => {
+            const [isOpen, setIsOpen] = useState(false);
+
+            return (
+                <div className="relative">
+                    <button 
+                        onClick={() => setIsOpen(!isOpen)}
+                        className="relative p-2 rounded-lg hover:bg-slate-100 transition"
+                    >
+                        🔔
+                        {notifications.length > 0 && (
+                            <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-bold rounded-full flex items-center justify-center">
+                                {notifications.length}
+                            </span>
+                        )}
+                    </button>
+                    {isOpen && (
+                        <div className="absolute right-0 mt-2 w-80 bg-white rounded-xl shadow-xl border border-slate-200 overflow-hidden z-50">
+                            <div className="p-3 border-b border-slate-100 font-bold text-slate-800">Notifications</div>
+                            <div className="max-h-64 overflow-y-auto">
+                                {notifications.map(n => (
+                                    <div key={n.id} className={`p-3 border-b border-slate-50 hover:bg-slate-50 transition ${
+                                        n.type === 'warning' ? 'border-l-4 border-l-amber-500' :
+                                        n.type === 'success' ? 'border-l-4 border-l-emerald-500' :
+                                        'border-l-4 border-l-blue-500'
+                                    }`}>
+                                        <p className="text-sm text-slate-700">{n.message}</p>
+                                        <p className="text-xs text-slate-400 mt-1">{n.time}</p>
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        };
+
+        // ============================================================
+        // 5. MAIN APP
+        // ============================================================
         const App = () => {
             const [view, setView] = useState('overview');
             const [role, setRole] = useState('Portfolio Manager');
+            const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
+            // Render the appropriate page based on view
+            const renderPage = () => {
+                switch(view) {
+                    case 'overview': return <OverviewPage role={role} />;
+                    case 'pareto': return <ParetoDashboard role={role} />;
+                    case 'buildings': return <BuildingsPage />;
+                    case 'onboarding': return <OnboardingFlow />;
+                    case 'reports': return <ReportsPage />;
+                    case 'whatsapp': return <WhatsAppPage />;
+                    default: return <OverviewPage role={role} />;
+                }
+            };
 
             return (
-                <div className="flex bg-slate-50 min-h-screen">
-                    <Sidebar currentView={view} setView={setView} role={role} />
-                    
-                    <main className="flex-1 ml-64 p-8">
-                        <header className="flex justify-between items-center mb-10">
-                            <div>
-                                <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
-                                    {view === 'overview' ? 'Portfolio Intelligence' : 
-                                     view === 'pareto' ? 'Pareto Analysis Engine' : 'System Setup'}
-                                </h1>
-                                <p className="text-slate-500">Real-time ESG and Energy Baselining</p>
-                            </div>
-                            
-                            <div className="flex items-center gap-4">
-                                <select 
-                                    className="bg-white border border-slate-200 px-4 py-2 rounded-lg text-sm font-medium shadow-sm"
-                                    onChange={(e) => setRole(e.target.value)}
-                                    value={role}
-                                >
-                                    <option>Portfolio Manager</option>
-                                    <option>CFO</option>
-                                    <option>Sustainability Lead</option>
-                                </select>
-                                <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
-                            </div>
+                <div className="flex min-h-screen bg-slate-50">
+                    {/* Sidebar */}
+                    <Sidebar 
+                        currentView={view} 
+                        setView={setView} 
+                        role={role}
+                        setRole={setRole}
+                    />
+
+                    {/* Main Content */}
+                    <main className="flex-1 ml-64 p-6 md:p-8 min-h-screen">
+                        {/* Mobile Header */}
+                        <header className="flex md:hidden items-center justify-between mb-6">
+                            <button onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="p-2">
+                                ☰
+                            </button>
+                            <span className="font-bold text-slate-800">GreenBDG</span>
+                            <NotificationsDropdown notifications={notifications} />
                         </header>
 
-                        {view === 'overview' && (
-                            <div className="grid grid-cols-1 gap-6">
-                                <Card title="Building Performance Snapshot">
-                                    <div className="overflow-x-auto">
-                                        <table className="w-full text-left">
-                                            <thead>
-                                                <tr className="border-b border-slate-100 text-slate-400 text-xs uppercase font-bold">
-                                                    <th className="pb-4">Building Name</th>
-                                                    <th className="pb-4">Usage Profile</th>
-                                                    <th className="pb-4">EPC Rating</th>
-                                                    <th className="pb-4">Priority Status</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody className="text-sm">
-                                                {portfolioStats.map(site => (
-                                                    <tr key={site.id} className="border-b border-slate-50 hover:bg-slate-50">
-                                                        <td className="py-4 font-bold text-slate-800">{site.name}</td>
-                                                        <td className="py-4">
-                                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${site.usage === 'High' ? 'bg-orange-100 text-orange-600' : site.usage === 'Critical' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
-                                                                {site.usage}
-                                                            </span>
-                                                        </td>
-                                                        <td className="py-4 font-mono font-bold text-slate-600">{site.efficiency}</td>
-                                                        <td className="py-4 text-slate-500">{site.status}</td>
-                                                    </tr>
-                                                ))}
-                                            </tbody>
-                                        </table>
-                                    </div>
-                                </Card>
-                                <div className="bg-emerald-600 p-8 rounded-2xl text-white flex justify-between items-center">
-                                    <div>
-                                        <h3 className="text-2xl font-bold">WhatsApp Assistant Active</h3>
-                                        <p className="opacity-80">Query your portfolio data via text: "How is Sandton performing?"</p>
-                                    </div>
-                                    <button className="bg-white text-emerald-600 px-6 py-3 rounded-xl font-bold shadow-lg">Link WhatsApp</button>
+                        {/* Desktop Header */}
+                        <div className="hidden md:flex items-center justify-between mb-8">
+                            <div>
+                                <h1 className="text-2xl font-black text-slate-800">
+                                    {view === 'overview' && '📊 Portfolio Intelligence'}
+                                    {view === 'pareto' && '📈 Pareto Analytics Engine'}
+                                    {view === 'buildings' && '🏢 Building Portfolio'}
+                                    {view === 'onboarding' && '⚙️ Setup & Onboarding'}
+                                    {view === 'reports' && '📄 ESG Reports'}
+                                    {view === 'whatsapp' && '💬 WhatsApp Assistant'}
+                                </h1>
+                                <p className="text-slate-500 text-sm">Real-time ESG and Energy Baselining</p>
+                            </div>
+                            <div className="flex items-center gap-4">
+                                <NotificationsDropdown notifications={notifications} />
+                                <div className="w-10 h-10 bg-emerald-100 rounded-full flex items-center justify-center text-emerald-700 font-bold text-sm">
+                                    {role.split(' ').map(w => w[0]).join('')}
                                 </div>
                             </div>
-                        )}
+                        </div>
 
-                        {view === 'pareto' && <ParetoDashboard role={role} />}
-                        {view === 'onboarding' && <OnboardingFlow />}
-                        {view === 'reports' && (
-                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
-                                <p className="text-slate-400 font-medium">No reports generated yet. Complete building onboarding first.</p>
-                            </div>
-                        )}
+                        {/* Page Content */}
+                        {renderPage()}
                     </main>
                 </div>
             );
         };
 
+        // ============================================================
+        // 6. RENDER
+        // ============================================================
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<App />);
     </script>
