@@ -1,0 +1,284 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GreenBDG | Energy & ESG Intelligence</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/recharts/umd/Recharts.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/lucide/0.263.0/lucide.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --oe: #059669; /* GreenBDG Primary Green */
+            --lt: #f8fafc; /* Background Light */
+            --te: #1e293b; /* Text Dark */
+        }
+        body { background-color: var(--lt); font-family: 'Inter', sans-serif; }
+        .sidebar-item:hover { background-color: rgba(5, 150, 105, 0.1); color: var(--oe); }
+        .active-nav { background-color: var(--oe); color: white !important; }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        const { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell, PieChart, Pie } = Recharts;
+
+        // --- Mock Data ---
+        const paretoData = [
+            { name: 'HVAC Systems', value: 45, cost: 'R450k', emissions: '120t' },
+            { name: 'Lighting', value: 20, cost: 'R200k', emissions: '50t' },
+            { name: 'Equipment', value: 15, cost: 'R150k', emissions: '40t' },
+            { name: 'Water Heating', value: 12, cost: 'R120k', emissions: '30t' },
+            { name: 'Other', value: 8, cost: 'R80k', emissions: '20t' },
+        ];
+
+        const portfolioStats = [
+            { id: 1, name: 'Sandton Towers', usage: 'High', efficiency: 'B-', status: 'Action Required' },
+            { id: 2, name: 'Menlyn Park', usage: 'Critical', efficiency: 'D', status: 'Maintenance Alert' },
+            { id: 3, name: 'Cape Quarter', usage: 'Optimal', efficiency: 'A', status: 'Healthy' }
+        ];
+
+        // --- UI Components ---
+        const Card = ({ title, children, subtitle }) => (
+            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800">{title}</h3>
+                {subtitle && <p className="text-sm text-slate-500 mb-4">{subtitle}</p>}
+                <div className="mt-4">{children}</div>
+            </div>
+        );
+
+        const Sidebar = ({ currentView, setView, role }) => (
+            <div className="w-64 h-screen bg-white border-r border-slate-200 fixed left-0 top-0 p-4">
+                <div className="flex items-center gap-2 mb-10 px-2">
+                    <div className="w-8 h-8 bg-emerald-600 rounded-lg flex items-center justify-center">
+                        <span className="text-white font-bold text-xl">G</span>
+                    </div>
+                    <span className="font-bold text-xl text-slate-800 tracking-tight">GreenBDG</span>
+                </div>
+                
+                <nav className="space-y-1">
+                    {[
+                        { id: 'overview', label: 'Overview', icon: 'layout-dashboard' },
+                        { id: 'pareto', label: 'Pareto Analytics', icon: 'pie-chart' },
+                        { id: 'onboarding', label: 'Setup & Data', icon: 'plus-circle' },
+                        { id: 'reports', label: 'ESG Reports', icon: 'file-text' }
+                    ].map(item => (
+                        <button 
+                            key={item.id}
+                            onClick={() => setView(item.id)}
+                            className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-all ${currentView === item.id ? 'active-nav' : 'text-slate-600 sidebar-item'}`}
+                        >
+                            <span>{item.label}</span>
+                        </button>
+                    ))}
+                </nav>
+
+                <div className="absolute bottom-8 left-4 right-4 bg-slate-50 p-4 rounded-xl">
+                    <p className="text-xs text-slate-500 mb-1">Signed in as:</p>
+                    <p className="text-sm font-bold text-slate-800 truncate">{role}</p>
+                </div>
+            </div>
+        );
+
+        // --- Pages ---
+        const ParetoDashboard = ({ role }) => (
+            <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div className="bg-emerald-50 border border-emerald-100 p-6 rounded-xl">
+                        <p className="text-emerald-700 text-sm font-semibold uppercase tracking-wider">Top Efficiency Gap</p>
+                        <h2 className="text-3xl font-black text-emerald-900 mt-2">HVAC Systems</h2>
+                        <p className="text-emerald-600 text-sm mt-1">Responsible for 45% of total spend.</p>
+                    </div>
+                    <div className="bg-slate-800 p-6 rounded-xl text-white">
+                        <p className="text-slate-400 text-sm font-semibold uppercase tracking-wider">Annual Saving Opportunity</p>
+                        <h2 className="text-3xl font-black text-white mt-2">R1.2M</h2>
+                        <p className="text-slate-400 text-sm mt-1">Based on Pareto optimization.</p>
+                    </div>
+                    <div className="bg-white border border-slate-200 p-6 rounded-xl">
+                        <p className="text-slate-500 text-sm font-semibold uppercase tracking-wider">Data Confidence Score</p>
+                        <h2 className="text-3xl font-black text-slate-800 mt-2">82%</h2>
+                        <div className="w-full bg-slate-100 h-2 mt-3 rounded-full overflow-hidden">
+                            <div className="bg-emerald-500 h-full w-[82%]"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <Card title="Energy Consumption by Subsystem" subtitle="Pareto Principle: 80% of energy usage is driven by these core systems.">
+                        <div className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <BarChart data={paretoData}>
+                                    <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                                    <XAxis dataKey="name" />
+                                    <YAxis />
+                                    <Tooltip />
+                                    <Bar dataKey="value" radius={[4, 4, 0, 0]}>
+                                        {paretoData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={index === 0 ? '#059669' : '#94a3b8'} />
+                                        ))}
+                                    </Bar>
+                                </BarChart>
+                            </ResponsiveContainer>
+                        </div>
+                    </Card>
+
+                    <Card title={role === 'CFO' ? 'Financial Impact' : 'Carbon Footprint Breakdown'}>
+                        <div className="h-[300px]">
+                            <ResponsiveContainer width="100%" height="100%">
+                                <PieChart>
+                                    <Pie data={paretoData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={80} fill="#8884d8" label>
+                                        {paretoData.map((entry, index) => (
+                                            <Cell key={`cell-${index}`} fill={['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'][index]} />
+                                        ))}
+                                    </Pie>
+                                    <Tooltip />
+                                </PieChart>
+                            </ResponsiveContainer>
+                        </div>
+                        <div className="mt-4 grid grid-cols-2 gap-4">
+                            {paretoData.slice(0, 2).map(item => (
+                                <div key={item.name} className="p-3 bg-slate-50 rounded-lg">
+                                    <p className="text-xs text-slate-500 uppercase font-bold">{item.name}</p>
+                                    <p className="text-lg font-bold text-slate-800">{role === 'CFO' ? item.cost : item.emissions}</p>
+                                </div>
+                            ))}
+                        </div>
+                    </Card>
+                </div>
+            </div>
+        );
+
+        const OnboardingFlow = () => {
+            const [step, setStep] = useState(1);
+            return (
+                <div className="max-w-2xl mx-auto mt-10">
+                    <Card title="Building Onboarding" subtitle={`Step ${step} of 3: Initialize your portfolio`}>
+                        {step === 1 && (
+                            <div className="space-y-4">
+                                <label className="block text-sm font-medium text-slate-700">Portfolio Name</label>
+                                <input type="text" className="w-full p-3 border rounded-lg focus:ring-2 ring-emerald-500 outline-none" placeholder="e.g. Growthpoint Premium Portfolio" />
+                                <button onClick={() => setStep(2)} className="w-full bg-emerald-600 text-white py-3 rounded-lg font-bold hover:bg-emerald-700 transition">Continue</button>
+                            </div>
+                        )}
+                        {step === 2 && (
+                            <div className="space-y-4">
+                                <div className="border-2 border-dashed border-slate-300 rounded-xl p-10 text-center">
+                                    <p className="text-slate-500 mb-4">Upload energy data (CSV, XLSX) or link smart meters</p>
+                                    <button className="bg-slate-800 text-white px-6 py-2 rounded-lg text-sm">Select Files</button>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 bg-slate-100 py-3 rounded-lg font-bold">Back</button>
+                                    <button onClick={() => setStep(3)} className="flex-1 bg-emerald-600 text-white py-3 rounded-lg font-bold">Process Pareto Analysis</button>
+                                </div>
+                            </div>
+                        )}
+                        {step === 3 && (
+                            <div className="text-center py-10">
+                                <div className="w-16 h-16 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-4">
+                                    <span className="text-2xl font-bold">✓</span>
+                                </div>
+                                <h2 className="text-xl font-bold mb-2">Analysis Complete</h2>
+                                <p className="text-slate-500 mb-6">We've identified R1.2M in potential savings across 12 buildings.</p>
+                                <button onClick={() => window.location.reload()} className="bg-emerald-600 text-white px-8 py-3 rounded-lg font-bold">View My Dashboard</button>
+                            </div>
+                        )}
+                    </Card>
+                </div>
+            );
+        };
+
+        // --- Main App ---
+        const App = () => {
+            const [view, setView] = useState('overview');
+            const [role, setRole] = useState('Portfolio Manager');
+
+            return (
+                <div className="flex bg-slate-50 min-h-screen">
+                    <Sidebar currentView={view} setView={setView} role={role} />
+                    
+                    <main className="flex-1 ml-64 p-8">
+                        <header className="flex justify-between items-center mb-10">
+                            <div>
+                                <h1 className="text-2xl font-black text-slate-800 uppercase tracking-tight">
+                                    {view === 'overview' ? 'Portfolio Intelligence' : 
+                                     view === 'pareto' ? 'Pareto Analysis Engine' : 'System Setup'}
+                                </h1>
+                                <p className="text-slate-500">Real-time ESG and Energy Baselining</p>
+                            </div>
+                            
+                            <div className="flex items-center gap-4">
+                                <select 
+                                    className="bg-white border border-slate-200 px-4 py-2 rounded-lg text-sm font-medium shadow-sm"
+                                    onChange={(e) => setRole(e.target.value)}
+                                    value={role}
+                                >
+                                    <option>Portfolio Manager</option>
+                                    <option>CFO</option>
+                                    <option>Sustainability Lead</option>
+                                </select>
+                                <div className="w-10 h-10 bg-slate-200 rounded-full"></div>
+                            </div>
+                        </header>
+
+                        {view === 'overview' && (
+                            <div className="grid grid-cols-1 gap-6">
+                                <Card title="Building Performance Snapshot">
+                                    <div className="overflow-x-auto">
+                                        <table className="w-full text-left">
+                                            <thead>
+                                                <tr className="border-b border-slate-100 text-slate-400 text-xs uppercase font-bold">
+                                                    <th className="pb-4">Building Name</th>
+                                                    <th className="pb-4">Usage Profile</th>
+                                                    <th className="pb-4">EPC Rating</th>
+                                                    <th className="pb-4">Priority Status</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody className="text-sm">
+                                                {portfolioStats.map(site => (
+                                                    <tr key={site.id} className="border-b border-slate-50 hover:bg-slate-50">
+                                                        <td className="py-4 font-bold text-slate-800">{site.name}</td>
+                                                        <td className="py-4">
+                                                            <span className={`px-2 py-1 rounded-full text-xs font-bold ${site.usage === 'High' ? 'bg-orange-100 text-orange-600' : site.usage === 'Critical' ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
+                                                                {site.usage}
+                                                            </span>
+                                                        </td>
+                                                        <td className="py-4 font-mono font-bold text-slate-600">{site.efficiency}</td>
+                                                        <td className="py-4 text-slate-500">{site.status}</td>
+                                                    </tr>
+                                                ))}
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </Card>
+                                <div className="bg-emerald-600 p-8 rounded-2xl text-white flex justify-between items-center">
+                                    <div>
+                                        <h3 className="text-2xl font-bold">WhatsApp Assistant Active</h3>
+                                        <p className="opacity-80">Query your portfolio data via text: "How is Sandton performing?"</p>
+                                    </div>
+                                    <button className="bg-white text-emerald-600 px-6 py-3 rounded-xl font-bold shadow-lg">Link WhatsApp</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {view === 'pareto' && <ParetoDashboard role={role} />}
+                        {view === 'onboarding' && <OnboardingFlow />}
+                        {view === 'reports' && (
+                            <div className="text-center py-20 bg-white rounded-2xl border border-dashed border-slate-300">
+                                <p className="text-slate-400 font-medium">No reports generated yet. Complete building onboarding first.</p>
+                            </div>
+                        )}
+                    </main>
+                </div>
+            );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<App />);
+    </script>
+</body>
+</html>
