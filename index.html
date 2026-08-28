@@ -1,459 +1,1589 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>GreenBDG Africa · Building Energy Intelligence</title>
-  <!-- Font & Icons -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;14..32,500;14..32,600;14..32,700;14..32,800&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>GreenBDG Africa | Pareto Energy Intelligence</title>
+    
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js">
+    </script>
+    
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+    
+    <style>
+        /* ============================================================
+           CSS VARIABLES - GreenBDG Theme
+           ============================================================ */
+        :root {
+            --primary: #059669;
+            --primary-dark: #047857;
+            --primary-light: #10b981;
+            --primary-bg: #ecfdf5;
+            --bg: #f0fdf4;
+            --surface: #ffffff;
+            --text: #0f172a;
+            --text-secondary: #64748b;
+            --text-light: #94a3b8;
+            --border: #e2e8f0;
+            --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.07), 0 2px 4px -1px rgba(0, 0, 0, 0.04);
+            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
+            --radius: 12px;
+            --radius-lg: 16px;
+            --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            --sidebar-width: 240px;
+        }
 
-    body {
-      font-family: 'Inter', sans-serif;
-      background: #f6f9fc;
-      color: #0b2a3c;
-      line-height: 1.6;
-      padding: 0 1rem 3rem;
-    }
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
 
-    .container {
-      max-width: 1280px;
-      margin: 0 auto;
-    }
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.6;
+            min-height: 100vh;
+            display: flex;
+        }
 
-    /* header */
-    .hero {
-      background: linear-gradient(145deg, #0b2a3c 0%, #1a4b5f 100%);
-      color: white;
-      border-radius: 2.5rem;
-      padding: 3rem 2.5rem;
-      margin: 1.5rem 0 2.5rem;
-      box-shadow: 0 20px 40px -12px rgba(0,20,30,0.4);
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::after {
-      content: "⚡";
-      position: absolute;
-      right: 2rem;
-      bottom: 1rem;
-      font-size: 8rem;
-      opacity: 0.1;
-      transform: rotate(12deg);
-      pointer-events: none;
-    }
-    .hero-tag {
-      background: rgba(255,255,255,0.12);
-      padding: 0.2rem 1.2rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      letter-spacing: 0.5px;
-      display: inline-block;
-      backdrop-filter: blur(4px);
-      border: 1px solid rgba(255,255,255,0.1);
-      margin-bottom: 1rem;
-    }
-    .hero h1 {
-      font-size: 3.2rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      line-height: 1.2;
-    }
-    .hero h1 span {
-      background: linear-gradient(to right, #b6e6ff, #7fc9e6);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero p {
-      font-size: 1.25rem;
-      opacity: 0.85;
-      max-width: 650px;
-      margin: 1rem 0 1.8rem;
-      font-weight: 400;
-    }
-    .hero-badge-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 1rem;
-    }
-    .hero-badge {
-      background: rgba(255,255,255,0.08);
-      border-radius: 60px;
-      padding: 0.4rem 1.2rem 0.4rem 0.8rem;
-      font-size: 0.9rem;
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-      border: 1px solid rgba(255,255,255,0.08);
-      backdrop-filter: blur(4px);
-    }
-    .hero-badge i {
-      color: #7fc9e6;
-      font-size: 1rem;
-    }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        ::-webkit-scrollbar-thumb { background: var(--primary); border-radius: 10px; }
+        ::-webkit-scrollbar-thumb:hover { background: var(--primary-dark); }
 
-    /* cards grid */
-    .grid-2 {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
-      gap: 1.8rem;
-      margin: 2.5rem 0;
-    }
+        /* ============================================================
+           SIDEBAR
+           ============================================================ */
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            transition: transform var(--transition);
+            overflow-y: auto;
+        }
 
-    .card {
-      background: white;
-      border-radius: 2rem;
-      padding: 1.8rem 1.8rem 1.8rem 1.8rem;
-      box-shadow: 0 8px 24px rgba(0,20,30,0.04);
-      border: 1px solid rgba(0,0,0,0.02);
-      transition: all 0.2s ease;
-      backdrop-filter: blur(2px);
-    }
-    .card:hover {
-      transform: translateY(-4px);
-      box-shadow: 0 20px 32px -12px rgba(11,42,60,0.12);
-      border-color: #dceef5;
-    }
-    .card-header {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      margin-bottom: 1.2rem;
-      border-bottom: 1px solid #eef5f9;
-      padding-bottom: 0.75rem;
-    }
-    .card-header i {
-      font-size: 1.6rem;
-      color: #1a6b7a;
-      width: 2.2rem;
-      text-align: center;
-    }
-    .card-header h3 {
-      font-size: 1.2rem;
-      font-weight: 700;
-      color: #0b2a3c;
-    }
+        .sidebar-logo {
+            padding: 20px 20px 16px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
 
-    .stat-row {
-      display: flex;
-      justify-content: space-between;
-      padding: 0.4rem 0;
-      font-size: 0.95rem;
-      border-bottom: 1px dashed #ebf2f7;
-    }
-    .stat-row:last-of-type { border-bottom: none; }
-    .stat-label { color: #2e5568; font-weight: 500; }
-    .stat-value { font-weight: 600; color: #0b2a3c; }
+        .sidebar-logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 900;
+            font-size: 20px;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
 
-    .pill {
-      background: #e3f0f5;
-      padding: 0.2rem 0.9rem;
-      border-radius: 40px;
-      font-size: 0.75rem;
-      font-weight: 600;
-      color: #105a6b;
-      display: inline-block;
-    }
+        .sidebar-logo-text {
+            font-weight: 800;
+            font-size: 20px;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
 
-    .badge-green { background: #d4f0e0; color: #0a6440; }
-    .badge-amber { background: #fcf1d6; color: #8f6b1f; }
-    .badge-red { background: #fde8e8; color: #b13e3e; }
+        .sidebar-logo-sub {
+            font-size: 9px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            display: block;
+            margin-top: -2px;
+        }
 
-    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .sidebar-nav {
+            flex: 1;
+            padding: 12px 10px;
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
 
-    .table-mini {
-      width: 100%;
-      font-size: 0.9rem;
-      border-collapse: collapse;
-    }
-    .table-mini td {
-      padding: 0.5rem 0.2rem;
-      border-bottom: 1px solid #eef5f9;
-    }
-    .table-mini tr:last-child td { border: none; }
-    .highlight {
-      font-weight: 700;
-      color: #0f4b5e;
-    }
+        .sidebar-nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 14px;
+            border-radius: var(--radius);
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--text-secondary);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            width: 100%;
+            text-align: left;
+        }
 
-    .role-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-      gap: 0.6rem;
-      margin-top: 0.5rem;
-    }
-    .role-chip {
-      background: #f0f7fa;
-      border-radius: 40px;
-      padding: 0.3rem 1rem 0.3rem 0.8rem;
-      font-size: 0.8rem;
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      font-weight: 500;
-      color: #154a5a;
-    }
-    .role-chip i {
-      font-size: 0.8rem;
-      color: #2b7f8f;
-    }
+        .sidebar-nav-item:hover {
+            background: var(--primary-bg);
+            color: var(--primary);
+        }
 
-    .demo-creds {
-      background: #eaf3f8;
-      border-radius: 1.2rem;
-      padding: 1.2rem 1.5rem;
-      margin: 1.5rem 0;
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      justify-content: space-between;
-    }
-    .demo-creds code {
-      background: #0b2a3c;
-      color: #b6e6ff;
-      padding: 0.2rem 0.8rem;
-      border-radius: 40px;
-      font-size: 0.8rem;
-      font-weight: 500;
-    }
+        .sidebar-nav-item.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 12px rgba(5, 150, 105, 0.3);
+        }
 
-    .footer-note {
-      text-align: center;
-      margin: 3rem 0 1rem;
-      font-size: 0.9rem;
-      color: #3d6a7a;
-      opacity: 0.7;
-      letter-spacing: 0.2px;
-    }
+        .sidebar-nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 15px;
+        }
 
-    .bar-progress {
-      display: flex;
-      align-items: center;
-      gap: 0.6rem;
-    }
-    .bar-track {
-      flex: 1;
-      height: 8px;
-      background: #e7f0f5;
-      border-radius: 20px;
-      overflow: hidden;
-    }
-    .bar-fill {
-      height: 100%;
-      border-radius: 20px;
-      background: #1f8a9e;
-    }
+        .sidebar-nav-item .badge {
+            margin-left: auto;
+            font-size: 9px;
+            background: rgba(5, 150, 105, 0.15);
+            color: var(--primary);
+            padding: 2px 10px;
+            border-radius: 20px;
+            font-weight: 700;
+        }
 
-    @media (max-width: 600px) {
-      .hero { padding: 2rem 1.5rem; }
-      .hero h1 { font-size: 2.2rem; }
-      .grid-2 { grid-template-columns: 1fr; }
-    }
-  </style>
+        .sidebar-nav-item.active .badge {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .sidebar-footer {
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+            background: #fafafa;
+        }
+
+        .sidebar-footer-user {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .sidebar-footer-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: var(--primary-bg);
+            color: var(--primary);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 14px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-footer-info { flex: 1; min-width: 0; }
+        .sidebar-footer-name { font-size: 13px; font-weight: 600; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+        .sidebar-footer-role { font-size: 11px; color: var(--text-secondary); }
+        .sidebar-footer-select { margin-top: 10px; width: 100%; padding: 8px 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; background: white; color: var(--text); outline: none; cursor: pointer; transition: border var(--transition); }
+        .sidebar-footer-select:focus { border-color: var(--primary); }
+
+        /* ============================================================
+           MAIN CONTENT
+           ============================================================ */
+        .main-content {
+            margin-left: var(--sidebar-width);
+            flex: 1;
+            padding: 24px 32px 32px;
+            min-height: 100vh;
+            transition: margin var(--transition);
+        }
+
+        .page-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 28px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+
+        .page-header-title {
+            font-size: 26px;
+            font-weight: 800;
+            color: var(--text);
+            letter-spacing: -0.5px;
+        }
+        .page-header-title span { color: var(--primary); }
+        .page-header-sub { font-size: 14px; color: var(--text-secondary); margin-top: 2px; }
+
+        .page-header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+
+        /* WhatsApp FAB */
+        .whatsapp-fab {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: #25D366;
+            color: white;
+            border: none;
+            font-size: 28px;
+            box-shadow: 0 4px 16px rgba(37, 211, 102, 0.4);
+            cursor: pointer;
+            z-index: 1000;
+            transition: all 0.3s ease;
+        }
+        .whatsapp-fab:hover { transform: scale(1.1); box-shadow: 0 6px 24px rgba(37, 211, 102, 0.5); }
+        .whatsapp-fab .dot {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            width: 22px;
+            height: 22px;
+            background: #ef4444;
+            border-radius: 50%;
+            font-size: 10px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 2px solid white;
+        }
+
+        /* WhatsApp Panel */
+        .whatsapp-panel {
+            position: fixed;
+            bottom: 100px;
+            right: 30px;
+            width: 400px;
+            height: 560px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            display: none;
+            flex-direction: column;
+            overflow: hidden;
+            animation: slideUp 0.3s ease;
+        }
+        .whatsapp-panel.active { display: flex; }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .wa-header {
+            padding: 14px 20px;
+            background: #075E54;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .wa-header h3 { margin: 0; font-size: 15px; display: flex; align-items: center; gap: 10px; }
+        .wa-header .close { background: none; border: none; color: white; font-size: 22px; cursor: pointer; opacity: 0.7; }
+        .wa-header .close:hover { opacity: 1; }
+
+        .wa-filters {
+            padding: 10px 16px;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            gap: 8px;
+        }
+        .wa-filters select {
+            flex: 1;
+            padding: 5px 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            font-size: 11px;
+            background: white;
+        }
+
+        .wa-messages {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 16px;
+        }
+
+        .wa-msg {
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
+            background: #f8f9fa;
+            border-left: 3px solid #25D366;
+            transition: background 0.2s;
+        }
+        .wa-msg:hover { background: #f1f3f5; }
+        .wa-msg .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 3px; }
+        .wa-msg .centre { font-weight: 700; font-size: 12px; color: #075E54; }
+        .wa-msg .sender { font-size: 11px; color: #6c757d; }
+        .wa-msg .time { font-size: 10px; color: #adb5bd; }
+        .wa-msg .text { font-size: 13px; color: #212529; margin: 3px 0; }
+        .wa-msg .prio { font-size: 9px; padding: 1px 8px; border-radius: 10px; font-weight: 600; }
+        .prio-critical { background: #fee2e2; color: #991b1b; }
+        .prio-high { background: #fef3c7; color: #92400e; }
+        .prio-medium { background: #dbeafe; color: #1e40af; }
+        .prio-normal { background: #dcfce7; color: #166534; }
+
+        .wa-input {
+            padding: 12px 16px;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            gap: 8px;
+        }
+        .wa-input input {
+            flex: 1;
+            padding: 8px 14px;
+            border: 1px solid #dee2e6;
+            border-radius: 20px;
+            font-size: 13px;
+            outline: none;
+        }
+        .wa-input input:focus { border-color: #25D366; }
+        .wa-input button {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: #25D366;
+            color: white;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .wa-input button:hover { background: #1da851; }
+
+        .wa-hint {
+            padding: 6px 20px;
+            font-size: 10px;
+            color: var(--text-light);
+            border-top: 1px solid var(--border);
+            background: var(--primary-bg);
+        }
+
+        /* ============================================================
+           CARDS & COMPONENTS
+           ============================================================ */
+        .card {
+            background: var(--surface);
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            padding: 20px 24px;
+            box-shadow: var(--shadow);
+            transition: all var(--transition);
+        }
+        .card:hover { box-shadow: var(--shadow-lg); }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 4px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .card-subtitle { font-size: 13px; color: var(--text-secondary); margin-bottom: 16px; }
+        .card-badge {
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 12px;
+            border-radius: 20px;
+            background: var(--primary-bg);
+            color: var(--primary);
+            margin-left: auto;
+        }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+
+        .metric-card {
+            padding: 18px 20px;
+            border-radius: var(--radius-lg);
+            border: 1px solid var(--border);
+            background: var(--surface);
+            transition: all var(--transition);
+        }
+        .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-lg); }
+        .metric-card .icon { font-size: 24px; margin-bottom: 6px; }
+        .metric-card .value { font-size: 26px; font-weight: 800; color: var(--text); letter-spacing: -0.5px; }
+        .metric-card .label { font-size: 13px; color: var(--text-secondary); margin-top: 2px; }
+        .metric-card .trend { font-size: 12px; font-weight: 600; margin-top: 4px; }
+        .metric-card .trend.up { color: #ef4444; }
+        .metric-card .trend.down { color: var(--primary); }
+        .metric-card.green { background: var(--primary-bg); border-color: var(--primary); }
+        .metric-card.green .value { color: var(--primary); }
+
+        .badge { display: inline-block; padding: 2px 12px; border-radius: 20px; font-size: 11px; font-weight: 700; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-danger { background: #fee2e2; color: #991b1b; }
+        .badge-info { background: #dbeafe; color: #1e40af; }
+        .badge-primary { background: var(--primary-bg); color: var(--primary); }
+
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 24px;
+            border-radius: var(--radius);
+            font-weight: 700;
+            font-size: 14px;
+            border: none;
+            cursor: pointer;
+            transition: all var(--transition);
+            text-decoration: none;
+        }
+        .btn-primary { background: var(--primary); color: white; }
+        .btn-primary:hover { background: var(--primary-dark); box-shadow: 0 4px 16px rgba(5, 150, 105, 0.3); transform: translateY(-1px); }
+        .btn-outline { background: transparent; color: var(--text); border: 1px solid var(--border); }
+        .btn-outline:hover { border-color: var(--primary); color: var(--primary); background: var(--primary-bg); }
+        .btn-sm { padding: 6px 16px; font-size: 12px; }
+        .btn-block { width: 100%; justify-content: center; }
+
+        .table-container { overflow-x: auto; }
+        .table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        .table th { text-align: left; padding: 10px 14px; font-size: 11px; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); }
+        .table td { padding: 10px 14px; border-bottom: 1px solid var(--border); }
+        .table tr:hover td { background: var(--primary-bg); }
+
+        .hero-banner {
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            border-radius: var(--radius-lg);
+            padding: 28px 36px;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        .hero-banner h1 { font-size: 22px; font-weight: 800; }
+        .hero-banner p { color: rgba(255, 255, 255, 0.8); margin-top: 4px; }
+        .hero-banner .btn { background: rgba(255, 255, 255, 0.2); color: white; backdrop-filter: blur(8px); }
+        .hero-banner .btn:hover { background: rgba(255, 255, 255, 0.3); }
+
+        .chart-container { position: relative; height: 250px; width: 100%; }
+        .chart-container-sm { height: 200px; }
+
+        .insight-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 16px;
+            padding: 16px;
+            background: var(--primary-bg);
+            border-radius: var(--radius);
+            border: 1px solid rgba(5, 150, 105, 0.15);
+            margin-bottom: 12px;
+        }
+        .insight-item .num {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            font-size: 13px;
+            flex-shrink: 0;
+        }
+        .insight-item .content { flex: 1; }
+        .insight-item .content h4 { font-size: 14px; font-weight: 600; }
+        .insight-item .content p { font-size: 13px; color: var(--text-secondary); }
+        .insight-item .action {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--primary);
+            background: none;
+            border: none;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .insight-item .action:hover { text-decoration: underline; }
+
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            padding: 14px 28px;
+            border-radius: var(--radius);
+            background: var(--text);
+            color: white;
+            font-weight: 500;
+            box-shadow: var(--shadow-lg);
+            opacity: 0;
+            transition: all 0.4s ease;
+            z-index: 999;
+            max-width: 500px;
+            text-align: center;
+        }
+        .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+        .toast.success { background: var(--primary); }
+        .toast.error { background: #ef4444; }
+        .toast.info { background: #3b82f6; }
+
+        .menu-toggle {
+            display: none;
+            position: fixed;
+            top: 16px;
+            left: 16px;
+            z-index: 200;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            padding: 10px 14px;
+            cursor: pointer;
+            font-size: 20px;
+            box-shadow: var(--shadow);
+        }
+        .menu-toggle:hover { background: var(--primary-bg); }
+
+        .sidebar-overlay {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.3);
+            z-index: 99;
+        }
+        .sidebar-overlay.active { display: block; }
+
+        .page-content { animation: slideUp 0.4s ease-out forwards; }
+
+        /* ============================================================
+           RESPONSIVE
+           ============================================================ */
+        @media (max-width: 1024px) { .grid-2 { grid-template-columns: 1fr; } .grid-3 { grid-template-columns: 1fr 1fr; } .grid-4 { grid-template-columns: 1fr 1fr; } }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); width: 280px; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; padding: 16px; }
+            .grid-3 { grid-template-columns: 1fr; }
+            .grid-4 { grid-template-columns: 1fr 1fr; }
+            .hero-banner { flex-direction: column; text-align: center; padding: 20px; }
+            .page-header { flex-direction: column; }
+            .page-header-actions { width: 100%; justify-content: flex-start; }
+            .menu-toggle { display: flex !important; }
+            .whatsapp-panel { width: calc(100% - 32px); right: 16px; bottom: 80px; height: 70vh; }
+            .whatsapp-fab { right: 16px; bottom: 16px; width: 54px; height: 54px; font-size: 24px; }
+        }
+        @media (max-width: 480px) { .grid-4 { grid-template-columns: 1fr; } }
+
+        .flex { display: flex; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .items-center { align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .mt-2 { margin-top: 8px; }
+        .mt-4 { margin-top: 16px; }
+        .mb-4 { margin-bottom: 16px; }
+        .w-full { width: 100%; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .flex-wrap { flex-wrap: wrap; }
+    </style>
 </head>
 <body>
-<div class="container">
 
-  <!-- HERO -->
-  <div class="hero">
-    <div class="hero-tag"><i class="fas fa-bolt" style="margin-right: 6px;"></i> AI-powered Pareto · SA commercial</div>
-    <h1>GreenBDG <span>Africa</span></h1>
-    <p>Building Energy Intelligence Platform — identify the 20% of issues causing 80% of energy waste, quantified in ZAR &amp; tCO₂e.</p>
-    <div class="hero-badge-group">
-      <span class="hero-badge"><i class="fas fa-chart-pie"></i> Pareto engine</span>
-      <span class="hero-badge"><i class="fas fa-building"></i> 5 demo buildings</span>
-      <span class="hero-badge"><i class="fab fa-whatsapp"></i> WhatsApp bot</span>
-      <span class="hero-badge"><i class="fas fa-shield-alt"></i> Role-based access</span>
-    </div>
-  </div>
+    <!-- ============================================================
+    MENU TOGGLE
+    ============================================================ -->
+    <button class="menu-toggle" id="menuToggle" aria-label="Toggle menu">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
 
-  <!-- QUICK STATS + ARCHITECTURE CARD -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><i class="fas fa-microchip"></i><h3>Core capabilities</h3></div>
-      <div class="stat-row"><span class="stat-label"><i class="far fa-file-alt" style="margin-right: 8px;"></i>Data ingestion</span><span>CSV / XLSX with validation</span></div>
-      <div class="stat-row"><span class="stat-label"><i class="fas fa-bolt" style="margin-right: 8px;"></i>Pareto analysis</span><span>HVAC · lighting · equipment</span></div>
-      <div class="stat-row"><span class="stat-label"><i class="fas fa-leaf" style="margin-right: 8px;"></i>Carbon factor</span><span>0.95 kgCO₂e/kWh (Eskom 2024)</span></div>
-      <div class="stat-row"><span class="stat-label"><i class="fas fa-chart-line" style="margin-right: 8px;"></i>EPC grading</span><span>SANS 10400-XA benchmark</span></div>
-      <div class="stat-row"><span class="stat-label"><i class="fas fa-robot" style="margin-right: 8px;"></i>WhatsApp bot</span><span>natural language queries</span></div>
-    </div>
+    <!-- ============================================================
+    SIDEBAR
+    ============================================================ -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-logo">
+            <div class="sidebar-logo-icon">G</div>
+            <div>
+                <span class="sidebar-logo-text">GreenBDG</span>
+                <span class="sidebar-logo-sub">Africa • Pareto</span>
+            </div>
+        </div>
+        <nav class="sidebar-nav" id="sidebarNav">
+            <button class="sidebar-nav-item active" data-view="overview"><i class="fas fa-chart-pie"></i> Overview</button>
+            <button class="sidebar-nav-item" data-view="pareto"><i class="fas fa-chart-bar"></i> Pareto Analytics <span class="badge">NEW</span></button>
+            <button class="sidebar-nav-item" data-view="buildings"><i class="fas fa-building"></i> Buildings</button>
+            <button class="sidebar-nav-item" data-view="sustainability"><i class="fas fa-leaf"></i> Sustainability</button>
+            <button class="sidebar-nav-item" data-view="iso"><i class="fas fa-certificate"></i> ISO Compliance</button>
+            <button class="sidebar-nav-item" data-view="netzero"><i class="fas fa-globe-africa"></i> Net Zero</button>
+        </nav>
+        <div class="sidebar-footer">
+            <div class="sidebar-footer-user">
+                <div class="sidebar-footer-avatar" id="userAvatar">PM</div>
+                <div class="sidebar-footer-info">
+                    <div class="sidebar-footer-name" id="userName">Portfolio Manager</div>
+                    <div class="sidebar-footer-role">Pareto Limited</div>
+                </div>
+            </div>
+            <select class="sidebar-footer-select" id="roleSelect">
+                <option value="Portfolio Manager">Portfolio Manager</option>
+                <option value="CFO">CFO</option>
+                <option value="Sustainability Officer">Sustainability Officer</option>
+                <option value="Facilities Manager">Facilities Manager</option>
+                <option value="Tenant">Tenant</option>
+            </select>
+        </div>
+    </aside>
 
-    <div class="card">
-      <div class="card-header"><i class="fas fa-cubes"></i><h3>Architecture</h3></div>
-      <div style="display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.9rem;">
-        <div><span class="pill" style="background:#d6eaf0;">React + TS</span> <span style="color:#1b5a6b;">Vite · TanStack Query</span></div>
-        <div><span class="pill" style="background:#d6eaf0;">Express + TS</span> <span style="color:#1b5a6b;">JWT · Magic links</span></div>
-        <div><span class="pill" style="background:#d6eaf0;">Prisma ORM</span> <span style="color:#1b5a6b;">SQLite / PostgreSQL</span></div>
-        <div><span class="pill" style="background:#d6eaf0;">Twilio / Meta</span> <span style="color:#1b5a6b;">WhatsApp webhook</span></div>
-        <div><span class="pill" style="background:#d6eaf0;">Vercel + Railway</span> <span style="color:#1b5a6b;">deployment</span></div>
-      </div>
-      <div style="margin-top: 1rem; background:#f2f8fb; border-radius: 1rem; padding: 0.6rem 1rem; font-size:0.85rem;">
-        <i class="fas fa-arrow-right" style="color:#1f8a9e;"></i> Data flow: CSV → parser → validation → Pareto engine → findings + ZAR impact
-      </div>
-    </div>
-  </div>
+    <!-- ============================================================
+    WHATSAPP FAB + PANEL
+    ============================================================ -->
+    <button class="whatsapp-fab" id="whatsappFab">
+        <i class="fab fa-whatsapp"></i>
+        <span class="dot">3</span>
+    </button>
 
-  <!-- PARETO METHODOLOGY + DEMO CREDENTIALS -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><i class="fas fa-chart-simple"></i><h3>Pareto methodology</h3></div>
-      <div style="margin-bottom: 0.5rem;">
-        <span class="pill">HVAC 50–60%</span>
-        <span class="pill">Lighting 18–25%</span>
-        <span class="pill">Equipment 10–15%</span>
-        <span class="pill">Hot water 5–8%</span>
-      </div>
-      <div class="stat-row"><span class="stat-label">Data quality score</span><span><span class="pill" style="background:#d4f0e0;">78 / 100</span> (demo)</span></div>
-      <div class="stat-row"><span class="stat-label">Cost per kWh</span><span>R1.50 (blended TOU)</span></div>
-      <div class="stat-row"><span class="stat-label">Reduction factors</span><span>HVAC 10% · Lighting 40% · Equipment 15%</span></div>
-      <div style="margin-top: 0.6rem; background:#f4faff; border-radius: 1rem; padding: 0.8rem; font-size:0.9rem;">
-        <i class="fas fa-bullseye" style="color:#1f6f7a;"></i> <strong>Finding generation:</strong> cumulative 80% cutoff, impact HIGH/MEDIUM/LOW, payback estimate.
-      </div>
-    </div>
-
-    <div class="card">
-      <div class="card-header"><i class="fas fa-user-lock"></i><h3>Demo credentials</h3></div>
-      <div style="margin-bottom: 0.5rem; font-size:0.9rem; font-weight:500; color:#1b5a6b;">All passwords: <code style="background:#eef5f9; padding:0 0.5rem;">Admin123! / Portfolio123! …</code></div>
-      <div class="role-grid">
-        <span class="role-chip"><i class="fas fa-crown"></i> Admin</span>
-        <span class="role-chip"><i class="fas fa-briefcase"></i> Portfolio Mgr</span>
-        <span class="role-chip"><i class="fas fa-coins"></i> CFO</span>
-        <span class="role-chip"><i class="fas fa-leaf"></i> Sustainability</span>
-        <span class="role-chip"><i class="fas fa-wrench"></i> Facilities</span>
-        <span class="role-chip"><i class="fas fa-chart-bar"></i> Data Analyst</span>
-        <span class="role-chip"><i class="fas fa-user"></i> Tenant</span>
-      </div>
-      <div style="margin-top: 0.8rem; background: #f0f7fa; border-radius: 1rem; padding: 0.6rem 1rem;">
-        <i class="fas fa-building" style="color:#1f6f7a;"></i> <strong>5 demo SA buildings</strong> — Sandton City, Menlyn Park, V&A Waterfront, Rosebank, Gateway
-      </div>
-    </div>
-  </div>
-
-  <!-- SAMPLE PARETO FINDINGS + WHATSAPP -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><i class="fas fa-bolt"></i><h3>Sample Pareto findings</h3></div>
-      <table class="table-mini">
-        <tr><td><strong>HVAC</strong> <span class="pill badge-red">HIGH</span></td><td>55.9% of total</td><td>R1.22M/yr</td></tr>
-        <tr><td><strong>Lighting</strong> <span class="pill badge-amber">MEDIUM</span></td><td>22% of total</td><td>R482k/yr</td></tr>
-        <tr><td><strong>Equipment</strong> <span class="pill badge-green">LOW</span></td><td>12% of total</td><td>R262k/yr</td></tr>
-        <tr style="border-top:2px solid #dcecf5;"><td colspan="3" style="padding-top:0.8rem; font-weight:600;">Total energy: 1,458 MWh · 1,385 tCO₂e</td></tr>
-      </table>
-      <div style="margin-top: 0.6rem; background:#e8f3f7; padding:0.5rem 1rem; border-radius:60px; font-size:0.85rem; display:flex; gap:1rem; flex-wrap:wrap;">
-        <span><i class="fas fa-lightbulb" style="color:#e68a2e;"></i> LED retrofit: 40% savings</span>
-        <span><i class="fas fa-snowflake" style="color:#1f8a9e;"></i> BMS retro-commissioning</span>
-      </div>
+    <div class="whatsapp-panel" id="whatsappPanel">
+        <div class="wa-header">
+            <h3><i class="fab fa-whatsapp"></i> Operations Feed</h3>
+            <button class="close" id="waClose">&times;</button>
+        </div>
+        <div class="wa-filters">
+            <select id="waCentreFilter"><option value="all">All Centres</option><option value="cresta">Cresta</option><option value="menlyn">Menlyn</option><option value="mimosa">Mimosa</option><option value="pavilion">Pavilion</option><option value="southgate">Southgate</option><option value="tygervalley">Tygervalley</option><option value="westgate">Westgate</option></select>
+            <select id="waPriorityFilter"><option value="all">All Priorities</option><option value="critical">Critical</option><option value="high">High</option><option value="medium">Medium</option><option value="normal">Normal</option></select>
+        </div>
+        <div class="wa-messages" id="waMessages"></div>
+        <div class="wa-input">
+            <input type="text" id="waInput" placeholder="Type a message..." />
+            <button id="waSend"><i class="fas fa-paper-plane"></i></button>
+        </div>
+        <div class="wa-hint">💡 Try: "energy menlyn" or "pareto cresta" or "help"</div>
     </div>
 
-    <div class="card">
-      <div class="card-header"><i class="fab fa-whatsapp"></i><h3>WhatsApp bot</h3></div>
-      <div style="background: #e3f0f5; border-radius: 2rem; padding: 0.8rem 1.2rem; margin-bottom: 0.8rem;">
-        <i class="fas fa-robot" style="margin-right:6px;"></i> <span style="font-weight:500;">Twilio / Meta Cloud API</span>
-      </div>
-      <div><span class="pill">webhook</span> <code style="background:#eef5f9; padding:0.2rem 0.6rem;">/api/whatsapp/webhook</code></div>
-      <div style="margin-top:0.6rem;">
-        <span class="pill">“What is the energy usage for Sandton City?”</span>
-        <span class="pill">“Show carbon emissions”</span>
-        <span class="pill">“Pareto summary”</span>
-      </div>
-      <div style="margin-top:0.8rem; background:#f4faff; border-radius:1rem; padding:0.5rem 1rem; font-size:0.9rem;">
-        <i class="fas fa-arrow-right" style="color:#1f8a9e;"></i> Natural language + direct API query
-      </div>
-    </div>
-  </div>
+    <!-- ============================================================
+    MAIN CONTENT
+    ============================================================ -->
+    <main class="main-content" id="mainContent">
+        <header class="page-header">
+            <div>
+                <h1 class="page-header-title" id="pageTitle">📊 Portfolio <span>Intelligence</span></h1>
+                <p class="page-header-sub" id="pageSub">Real-time ESG and Energy Baselining for Pareto Portfolio</p>
+            </div>
+            <div class="page-header-actions">
+                <button class="btn btn-primary" id="actionBtn"><i class="fas fa-file-export"></i> Export Report</button>
+            </div>
+        </header>
+        <div class="page-content" id="pageContent"></div>
+    </main>
 
-  <!-- USER ROLES & API ENDPOINTS -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><i class="fas fa-users"></i><h3>User roles</h3></div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.5rem;">
-        <span class="role-chip"><i class="fas fa-crown"></i> ADMIN · full access</span>
-        <span class="role-chip"><i class="fas fa-briefcase"></i> PORTFOLIO_MANAGER · all buildings</span>
-        <span class="role-chip"><i class="fas fa-coins"></i> CFO · financial dashboards</span>
-        <span class="role-chip"><i class="fas fa-leaf"></i> SUSTAINABILITY · carbon/EPC</span>
-        <span class="role-chip"><i class="fas fa-wrench"></i> FACILITIES · assigned buildings</span>
-        <span class="role-chip"><i class="fas fa-chart-bar"></i> DATA_ANALYST · analytics & trigger</span>
-        <span class="role-chip"><i class="fas fa-user"></i> TENANT · own floor</span>
-      </div>
-      <div style="margin-top:0.8rem; font-size:0.9rem; background:#f2f8fb; padding:0.4rem 1rem; border-radius:40px;">
-        <i class="fas fa-shield-alt"></i> API middleware enforces role checks
-      </div>
-    </div>
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
 
-    <div class="card">
-      <div class="card-header"><i class="fas fa-code"></i><h3>Key API endpoints</h3></div>
-      <div style="font-size:0.9rem;">
-        <div><span class="pill">POST</span> <code>/auth/login</code> → JWT</div>
-        <div><span class="pill">GET</span> <code>/buildings</code> · role-filtered</div>
-        <div><span class="pill">POST</span> <code>/energy/:id/upload</code> CSV/XLSX</div>
-        <div><span class="pill">GET</span> <code>/pareto/:buildingId</code> findings</div>
-        <div><span class="pill">POST</span> <code>/staff/invite</code> magic link</div>
-      </div>
-      <div style="margin-top:0.6rem; background:#eaf3f8; border-radius:1rem; padding:0.4rem 1rem; display:flex; gap:1.2rem; flex-wrap:wrap;">
-        <span><i class="fas fa-key"></i> Bearer token auth</span>
-        <span><i class="fas fa-file-import"></i> multipart/form-data</span>
-      </div>
-    </div>
-  </div>
+    <!-- ============================================================
+    JAVASCRIPT - COMPLETE APPLICATION
+    ============================================================ -->
+    <script>
+        // ============================================================
+        // 1. DATA - Pareto Portfolio (from Annexure A)
+        // ============================================================
 
-  <!-- DEPLOYMENT + TECHNOLOGY -->
-  <div class="grid-2">
-    <div class="card">
-      <div class="card-header"><i class="fas fa-cloud-upload-alt"></i><h3>Deployment</h3></div>
-      <div><span class="pill">Vercel</span> frontend (Vite + TS)</div>
-      <div><span class="pill">Railway / Heroku</span> backend (PostgreSQL)</div>
-      <div style="margin-top:0.4rem; background:#f0f7fa; border-radius:1rem; padding:0.5rem 1rem; font-size:0.85rem;">
-        <i class="fas fa-database"></i> <strong>Production DB:</strong> PostgreSQL · <code>DATABASE_URL</code> via Prisma
-      </div>
-      <div style="margin-top:0.3rem;">
-        <span class="pill">VITE_API_URL</span> <code>https://your-backend.railway.app</code>
-      </div>
-    </div>
+        const centres = [
+            { id: 'cresta', name: 'Cresta', city: 'Johannesburg', province: 'Gauteng',
+                water: { baseline: 6001, actual: 4685, variance: -22 }, solar: { capacity: 4.00, forecast: 15.13,
+                    actual: 14.13, efficiency: 93 },
+                waste: { kg: 222259, recycled: 195359, rate: 88 }, energy: 12800, epc: 'B', status: 'Good' },
+            { id: 'menlyn', name: 'Menlyn', city: 'Pretoria', province: 'Gauteng',
+                water: { baseline: 25395, actual: 12820, variance: -49 }, solar: { capacity: 3.786, forecast: 4.65,
+                    actual: 6.04, efficiency: 130 },
+                waste: { kg: 318026, recycled: 250451, rate: 79 }, energy: 14200, epc: 'C+', status: 'Needs Improvement' },
+            { id: 'mimosa', name: 'Mimosa', city: 'Johannesburg', province: 'Gauteng',
+                water: { baseline: 3506, actual: 3037, variance: -13 }, solar: { capacity: 0.9, forecast: 3.08,
+                    actual: 2.69, efficiency: 87 },
+                waste: { kg: 89740, recycled: 36910, rate: 37 }, energy: 8400, epc: 'B+', status: 'Good' },
+            { id: 'pavilion', name: 'Pavilion', city: 'Durban', province: 'KwaZulu-Natal',
+                water: { baseline: 12783, actual: 14356, variance: 12 }, solar: { capacity: 0.5, forecast: 1.02,
+                    actual: 0.93, efficiency: 91 },
+                waste: { kg: 360394, recycled: 149254, rate: 41 }, energy: 15800, epc: 'B-', status: 'Needs Improvement' },
+            { id: 'southgate', name: 'Southgate', city: 'Johannesburg', province: 'Gauteng',
+                water: { baseline: 5795, actual: 3502, variance: -40 }, solar: { capacity: 1.2, forecast: 3.24,
+                    actual: 3.27, efficiency: 116 },
+                waste: { kg: 84577, recycled: 40782, rate: 48 }, energy: 10200, epc: 'A', status: 'Excellent' },
+            { id: 'tygervalley', name: 'Tygervalley', city: 'Cape Town', province: 'Western Cape',
+                water: { baseline: 6181, actual: 5261, variance: -15 }, solar: { capacity: 0, forecast: 0, actual: 0,
+                    efficiency: 0 },
+                waste: { kg: 193331, recycled: 141748, rate: 73 }, energy: 11200, epc: 'C', status: 'Needs Improvement' },
+            { id: 'westgate', name: 'Westgate', city: 'Johannesburg', province: 'Gauteng',
+                water: { baseline: 6873, actual: 6558, variance: -5 }, solar: { capacity: 4.00, forecast: 15.44,
+                    actual: 15.15, efficiency: 98 },
+                waste: { kg: 147421, recycled: 86451, rate: 59 }, energy: 13500, epc: 'B', status: 'Good' }
+        ];
 
-    <div class="card">
-      <div class="card-header"><i class="fas fa-layer-group"></i><h3>Stack</h3></div>
-      <div style="display: flex; flex-wrap: wrap; gap: 0.3rem 0.8rem;">
-        <span class="pill">React 19</span> <span class="pill">TypeScript</span> <span class="pill">Vite 5</span>
-        <span class="pill">TanStack Query</span> <span class="pill">Tailwind</span> <span class="pill">shadcn/ui</span>
-        <span class="pill">Express</span> <span class="pill">Prisma 5</span> <span class="pill">JWT</span>
-        <span class="pill">nodemailer</span> <span class="pill">csv-parse</span> <span class="pill">xlsx</span>
-      </div>
-      <div style="margin-top:0.8rem; background:#e8f3f7; border-radius: 1rem; padding:0.4rem 1rem;">
-        <i class="fas fa-chart-line"></i> Recharts · Radix UI · Magic links
-      </div>
-    </div>
-  </div>
+        // Southgate Value Market (combined with Southgate for simplicity)
+        const sgvm = { id: 'sgvm', name: 'Southgate VM', city: 'Johannesburg', province: 'Gauteng',
+            water: { baseline: 2038, actual: 2143, variance: 5 }, solar: { capacity: 1.1, forecast: 3.62, actual: 3.23,
+                efficiency: 89 },
+            waste: { kg: 39385, recycled: 18805, rate: 48 }, energy: 5200, epc: 'B', status: 'Good' };
+        centres.push(sgvm);
 
-  <!-- ENV + QUICK START SNIPPET -->
-  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1.8rem; margin-top: 1.8rem;">
-    <div class="card" style="grid-column: 1 / -1;">
-      <div class="card-header"><i class="fas fa-terminal"></i><h3>Quick start</h3></div>
-      <div style="display: flex; flex-wrap: wrap; gap: 1.5rem;">
-        <div><code style="background:#eef5f9; padding:0.2rem 0.8rem;">npm run setup</code> · install deps</div>
-        <div><code style="background:#eef5f9; padding:0.2rem 0.8rem;">cp server/.env.example server/.env</code></div>
-        <div><code style="background:#eef5f9; padding:0.2rem 0.8rem;">npm run db:setup</code> · seed demo data</div>
-        <div><code style="background:#eef5f9; padding:0.2rem 0.8rem;">npm run dev</code> → localhost:5173</div>
-      </div>
-      <div style="margin-top: 0.8rem; background:#1d3e4e; color:white; border-radius: 1.2rem; padding: 0.6rem 1.4rem; font-size:0.9rem;">
-        <i class="fas fa-check-circle" style="color:#7fc9e6;"></i> Environment: <code style="background:#2b5366; padding:0 0.6rem; color:white;">JWT_SECRET</code> · <code style="background:#2b5366; padding:0 0.6rem; color:white;">DATABASE_URL</code> · <code style="background:#2b5366; padding:0 0.6rem; color:white;">SMTP_*</code> · <code style="background:#2b5366; padding:0 0.6rem; color:white;">TWILIO_*</code>
-      </div>
-    </div>
-  </div>
+        const paretoData = [
+            { name: 'HVAC Systems', value: 55, cost: 1222500, emissions: 774, efficiency: 68, potential: 122250 },
+            { name: 'Lighting', value: 20, cost: 450000, emissions: 285, efficiency: 82, potential: 180000 },
+            { name: 'Equipment', value: 12, cost: 270000, emissions: 171, efficiency: 71, potential: 40500 },
+            { name: 'Hot Water', value: 8, cost: 180000, emissions: 114, efficiency: 64, potential: 36000 },
+            { name: 'Other', value: 5, cost: 112500, emissions: 71, efficiency: 55, potential: 16875 },
+        ];
 
-  <!-- FOOTER -->
-  <div class="footer-note">
-    <i class="fas fa-copyright"></i> GreenBDG Africa 2024 · MIT · AI-powered Pareto for SA commercial real estate
-  </div>
-</div>
+        const monthlyTrend = [
+            { month: 'Apr', energy: 1380000 }, { month: 'May', energy: 1320000 }, { month: 'Jun', energy: 1250000 },
+            { month: 'Jul', energy: 1180000 }, { month: 'Aug', energy: 1120000 }, { month: 'Sep', energy: 1080000 },
+            { month: 'Oct', energy: 1050000 }, { month: 'Nov', energy: 1020000 }, { month: 'Dec', energy: 980000 },
+            { month: 'Jan', energy: 950000 }, { month: 'Feb', energy: 920000 }, { month: 'Mar', energy: 900000 }
+        ];
+
+        const isoMilestones = [
+            { name: 'Consultant Appointment', done: true, date: 'July 2024' },
+            { name: 'GAP Analysis Review', done: true, date: 'August 2024' },
+            { name: 'Aspects & Impacts Register', done: true, date: 'September 2024' },
+            { name: 'ISO Awareness Training', done: false, date: 'October 2024' },
+            { name: 'Policy & Procedures Development', done: false, date: 'November 2024' },
+            { name: 'EMS Documentation', done: false, date: 'December 2024' },
+            { name: 'Pre-Certification Audit', done: false, date: 'March 2025' },
+            { name: 'Certification Audit', done: false, date: 'April 2025' }
+        ];
+
+        const waMessages = [
+            { id: 1, centre: 'menlyn', sender: 'James (FM)', text: 'HVAC maintenance completed. Efficiency +12%.',
+                time: '10:32 AM', priority: 'high', read: false },
+            { id: 2, centre: 'cresta', sender: 'Thabo (Ops)', text: 'Water leak detected near food court. Plumber ETA 15 min.',
+                time: '09:15 AM', priority: 'critical', read: false },
+            { id: 3, centre: 'westgate', sender: 'Lerato (Sustain)', text: 'Solar production 4.2MW today. 98% of forecast.',
+                time: '08:45 AM', priority: 'normal', read: true },
+            { id: 4, centre: 'pavilion', sender: 'Maria (FM)', text: 'Propelair toilets installed. 83% water savings expected.',
+                time: 'Yesterday, 4:30 PM', priority: 'high', read: true },
+            { id: 5, centre: 'tygervalley', sender: 'Sipho (Ops)',
+                text: 'Solar expansion delayed - roof strengthening required. New date: Mar 2025.', time: 'Yesterday, 2:15 PM',
+                priority: 'medium', read: true },
+            { id: 6, centre: 'mimosa', sender: 'Nomsa (Ops)', text: 'Borehole reticulation complete. Water security improved.',
+                time: 'Yesterday, 11:00 AM', priority: 'normal', read: true },
+        ];
+
+        const netZeroMilestones = [
+            { year: '2030', target: '50% emissions reduction', achieved: '42%', status: 'On Track' },
+            { year: '2030', target: 'Zero waste to landfill', achieved: '63% recycled', status: 'In Progress' },
+            { year: '2040', target: '75% emissions reduction', achieved: '28%', status: 'Planning' },
+            { year: '2040', target: '100% renewable energy', achieved: '15.49 MW', status: 'In Progress' },
+            { year: '2050', target: 'Net Zero emissions', achieved: '15%', status: 'Long-term' }
+        ];
+
+        // ============================================================
+        // 2. STATE
+        // ============================================================
+
+        let currentView = 'overview';
+        let currentRole = 'Portfolio Manager';
+        let chartInstances = {};
+        let waOpen = false;
+
+        // ============================================================
+        // 3. DOM REFS
+        // ============================================================
+
+        const $ = (s) => document.querySelector(s);
+        const $$ = (s) => document.querySelectorAll(s);
+        const sidebar = $('#sidebar');
+        const overlay = $('#sidebarOverlay');
+        const menuToggle = $('#menuToggle');
+        const pageContent = $('#pageContent');
+        const pageTitle = $('#pageTitle');
+        const pageSub = $('#pageSub');
+        const actionBtn = $('#actionBtn');
+        const roleSelect = $('#roleSelect');
+        const userAvatar = $('#userAvatar');
+        const userName = $('#userName');
+        const toast = $('#toast');
+        const waFab = $('#whatsappFab');
+        const waPanel = $('#whatsappPanel');
+        const waClose = $('#waClose');
+        const waMessagesEl = $('#waMessages');
+        const waInput = $('#waInput');
+        const waSend = $('#waSend');
+        const waCentreFilter = $('#waCentreFilter');
+        const waPriorityFilter = $('#waPriorityFilter');
+
+        // ============================================================
+        // 4. UTILITY FUNCTIONS
+        // ============================================================
+
+        function showToast(msg, type = 'info') {
+            toast.textContent = msg;
+            toast.className = `toast ${type}`;
+            toast.classList.add('show');
+            clearTimeout(toast._timeout);
+            toast._timeout = setTimeout(() => toast.classList.remove('show'), 3500);
+        }
+
+        function getInitials(name) {
+            return name.split(' ').map(w => w[0]).join('').toUpperCase().slice(0, 2);
+        }
+
+        function getEpcColor(epc) {
+            if (epc.startsWith('A')) return 'badge-success';
+            if (epc.startsWith('B')) return 'badge-info';
+            if (epc.startsWith('C')) return 'badge-warning';
+            return 'badge-danger';
+        }
+
+        function getStatusBadge(status) {
+            const map = { 'Excellent': 'badge-success', 'Good': 'badge-info', 'Needs Improvement': 'badge-warning',
+                'Critical': 'badge-danger' };
+            return map[status] || 'badge-info';
+        }
+
+        function formatCurrency(amount) { return 'R' + (amount / 1000).toFixed(0) + 'k'; }
+
+        function getCentreName(id) {
+            const c = centres.find(x => x.id === id);
+            return c ? c.name : id;
+        }
+
+        function getPriorityLabel(p) {
+            const map = { 'critical': 'Critical', 'high': 'High', 'medium': 'Medium', 'normal': 'Normal' };
+            return map[p] || p;
+        }
+
+        // ============================================================
+        // 5. WHATSAPP
+        // ============================================================
+
+        function renderWAMessages() {
+            const centreFilter = waCentreFilter.value;
+            const priorityFilter = waPriorityFilter.value;
+            let filtered = waMessages;
+            if (centreFilter !== 'all') filtered = filtered.filter(m => m.centre === centreFilter);
+            if (priorityFilter !== 'all') filtered = filtered.filter(m => m.priority === priorityFilter);
+
+            waMessagesEl.innerHTML = filtered.map(m => `
+                <div class="wa-msg">
+                    <div class="top">
+                        <span class="centre">🏢 ${getCentreName(m.centre)}</span>
+                        <span class="sender">${m.sender}</span>
+                        <span class="time">${m.time}</span>
+                    </div>
+                    <div class="text">${m.text}</div>
+                    <div style="display:flex;justify-content:space-between;margin-top:4px;">
+                        <span class="prio prio-${m.priority}">${getPriorityLabel(m.priority)}</span>
+                        ${!m.read ? '<span style="font-size:9px;color:#059669;font-weight:700;">● New</span>' : ''}
+                    </div>
+                </div>
+            `).join('') || '<div style="text-align:center;color:#94a3b8;padding:20px;">No messages match filters</div>';
+        }
+
+        function toggleWA() {
+            waOpen = !waOpen;
+            waPanel.classList.toggle('active', waOpen);
+            if (waOpen) renderWAMessages();
+        }
+
+        function sendWAMessage() {
+            const text = waInput.value.trim();
+            if (!text) return;
+            // Simulate sending
+            const newMsg = {
+                id: Date.now(),
+                centre: 'all',
+                sender: 'You (Ops)',
+                text: text,
+                time: 'Just now',
+                priority: 'normal',
+                read: true
+            };
+            waMessages.unshift(newMsg);
+            renderWAMessages();
+            waInput.value = '';
+            showToast('Message sent to operations team', 'success');
+
+            // Simulate auto-reply
+            setTimeout(() => {
+                const replies = [
+                    '✅ Message received by operations team.',
+                    '📊 I\'ll check the energy data for that building.',
+                    '🔧 Maintenance team has been notified.',
+                    '📈 Pulling the latest Pareto analysis for you.'
+                ];
+                const reply = {
+                    id: Date.now() + 1,
+                    centre: 'all',
+                    sender: 'GreenBDG Bot',
+                    text: replies[Math.floor(Math.random() * replies.length)],
+                    time: 'Just now',
+                    priority: 'normal',
+                    read: true
+                };
+                waMessages.unshift(reply);
+                renderWAMessages();
+            }, 1500);
+        }
+
+        // ============================================================
+        // 6. NAVIGATION
+        // ============================================================
+
+        function setActiveView(view) {
+            currentView = view;
+            $$('.sidebar-nav-item').forEach(el => {
+                el.classList.toggle('active', el.dataset.view === view);
+            });
+
+            const titles = {
+                overview: ['📊 Portfolio', 'Intelligence'],
+                pareto: ['📈 Pareto', 'Analytics'],
+                buildings: ['🏢 Building', 'Portfolio'],
+                sustainability: ['🌿 Sustainability', 'Performance'],
+                iso: ['📋 ISO', 'Compliance'],
+                netzero: ['🌍 Net Zero', 'Strategy']
+            };
+            const [a, b] = titles[view] || ['📊', 'Dashboard'];
+            pageTitle.innerHTML = `${a} <span>${b}</span>`;
+
+            const subs = {
+                overview: 'Real-time ESG and Energy Baselining for Pareto Portfolio',
+                pareto: '80/20 Rule: Focus on the vital few systems',
+                buildings: 'Manage your entire building portfolio',
+                sustainability: 'Water, solar, waste and carbon performance',
+                iso: 'ISO 14001 & 9001 Compliance Progress',
+                netzero: 'Progress against Net Zero and ESG Strategy'
+            };
+            pageSub.textContent = subs[view] || 'Dashboard';
+
+            const actions = {
+                overview: '<i class="fas fa-file-export"></i> Export Report',
+                pareto: '<i class="fas fa-sync-alt"></i> Run Analysis',
+                buildings: '<i class="fas fa-plus"></i> Add Building',
+                sustainability: '<i class="fas fa-download"></i> Download Report',
+                iso: '<i class="fas fa-upload"></i> Upload Evidence',
+                netzero: '<i class="fas fa-chart-line"></i> View Roadmap'
+            };
+            actionBtn.innerHTML = actions[view] || '<i class="fas fa-plus"></i> Action';
+
+            renderPage(view);
+            closeMobileMenu();
+        }
+
+        function toggleMobileMenu() {
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('active');
+            document.body.style.overflow = sidebar.classList.contains('open') ? 'hidden' : '';
+        }
+
+        function closeMobileMenu() {
+            sidebar.classList.remove('open');
+            overlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        // ============================================================
+        // 7. PAGE RENDERERS
+        // ============================================================
+
+        function renderPage(view) {
+            Object.values(chartInstances).forEach(c => c.destroy());
+            chartInstances = {};
+
+            const renderers = {
+                overview: renderOverview,
+                pareto: renderPareto,
+                buildings: renderBuildings,
+                sustainability: renderSustainability,
+                iso: renderISO,
+                netzero: renderNetZero
+            };
+
+            if (renderers[view]) {
+                pageContent.innerHTML = renderers[view]();
+                setTimeout(() => {
+                    if (view === 'overview') initOverviewCharts();
+                    if (view === 'pareto') initParetoCharts();
+                    if (view === 'sustainability') initSustainabilityCharts();
+                }, 100);
+            } else {
+                pageContent.innerHTML = '<p>Page not found.</p>';
+            }
+        }
+
+        // ============================================================
+        // 7.1 OVERVIEW PAGE
+        // ============================================================
+
+        function renderOverview() {
+            const totalEnergy = centres.reduce((s, c) => s + c.energy, 0);
+            const avgEpc = centres.reduce((s, c) => {
+                const scores = { 'A': 100, 'A-': 90, 'B+': 85, 'B': 80, 'B-': 75, 'C+': 70, 'C': 65, 'D': 50 };
+                return s + (scores[c.epc] || 50);
+            }, 0) / centres.length;
+
+            const critical = centres.filter(c => c.status === 'Needs Improvement' || c.status === 'Critical').length;
+
+            return `
+                <div class="hero-banner">
+                    <div>
+                        <h1>Welcome back, ${currentRole}</h1>
+                        <p>${centres.length} shopping centres · ${totalEnergy.toLocaleString()} kWh · ${avgEpc.toFixed(0)}% avg EPC</p>
+                    </div>
+                    <button class="btn" onclick="showToast('Portfolio report generated', 'success')">
+                        <i class="fas fa-file-pdf"></i> Export Portfolio
+                    </button>
+                </div>
+
+                <div class="grid-4">
+                    <div class="metric-card green"><div class="icon">🏢</div><div class="value">${centres.length}</div><div class="label">Shopping Centres</div></div>
+                    <div class="metric-card"><div class="icon">⚡</div><div class="value">${(totalEnergy/1000).toFixed(1)}k</div><div class="label">Total Energy (kWh)</div><div class="trend down">↓ 5.2% vs last year</div></div>
+                    <div class="metric-card"><div class="icon">⭐</div><div class="value">${(avgEpc/20).toFixed(0)}%</div><div class="label">Avg EPC Rating</div><div class="trend down">↑ 8% improvement</div></div>
+                    <div class="metric-card"><div class="icon">⚠️</div><div class="value">${critical}</div><div class="label">Action Items</div><div class="trend up">Requires attention</div></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">📉 Energy Consumption Trend <span class="card-badge">12 Months</span></div>
+                        <div class="card-subtitle">Monthly portfolio energy usage</div>
+                        <div class="chart-container"><canvas id="overviewTrendChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">🏗️ Centre Performance <span class="card-badge">Live</span></div>
+                        <div class="card-subtitle">Quick overview of all centres</div>
+                        <div class="table-container">
+                            <table class="table">
+                                <thead><tr><th>Centre</th><th>Energy</th><th>EPC</th><th>Status</th></tr></thead>
+                                <tbody>${centres.slice(0, 6).map(c => `
+                                    <tr>
+                                        <td><strong>${c.name}</strong><br><span style="font-size:12px;color:var(--text-secondary)">${c.city}</span></td>
+                                        <td><strong>${c.energy.toLocaleString()}</strong></td>
+                                        <td><span class="badge ${getEpcColor(c.epc)}">${c.epc}</span></td>
+                                        <td><span class="badge ${getStatusBadge(c.status)}">${c.status}</span></td>
+                                    </tr>
+                                `).join('')}</tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card" style="background:var(--primary-bg);border-color:var(--primary);">
+                    <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:16px;">
+                        <div>
+                            <div style="font-weight:700;font-size:18px;"><i class="fab fa-whatsapp" style="color:var(--primary);"></i> Operations Feed</div>
+                            <p style="color:var(--text-secondary);font-size:14px;">Real-time updates from facilities teams</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="toggleWA()"><i class="fab fa-whatsapp"></i> Open Feed</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initOverviewCharts() {
+            const ctx = document.getElementById('overviewTrendChart');
+            if (!ctx) return;
+            chartInstances.trend = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: monthlyTrend.map(d => d.month),
+                    datasets: [{ label: 'Energy (kWh)', data: monthlyTrend.map(d => d.energy), borderColor: '#059669',
+                        backgroundColor: 'rgba(5,150,105,0.1)', fill: true, tension: 0.4, pointRadius: 3 }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: { y: { beginAtZero: false, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } }
+                }
+            });
+        }
+
+        // ============================================================
+        // 7.2 PARETO PAGE
+        // ============================================================
+
+        function renderPareto() {
+            const totalCost = paretoData.reduce((s, d) => s + d.cost, 0);
+            const totalPotential = paretoData.reduce((s, d) => s + d.potential, 0);
+
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <div><h2 style="font-size:22px;font-weight:800;">⚡ Pareto Analysis Engine</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">80/20 Rule: HVAC drives ${paretoData[0].value}% of energy</p></div>
+                    <button class="btn btn-primary" onclick="showToast('Analysis re-run completed', 'success')"><i class="fas fa-sync-alt"></i> Run Analysis</button>
+                </div>
+
+                <div class="grid-4">
+                    <div class="metric-card green"><div class="icon">⚡</div><div class="value">${paretoData.reduce((s,d)=>s+d.value,0)}%</div><div class="label">Total Energy</div></div>
+                    <div class="metric-card"><div class="icon">💰</div><div class="value">${formatCurrency(totalCost)}</div><div class="label">Annual Cost</div><div class="trend down">-${Math.round((totalPotential/totalCost)*100)}% potential</div></div>
+                    <div class="metric-card"><div class="icon">🌿</div><div class="value">${paretoData.reduce((s,d)=>s+d.emissions,0)}t</div><div class="label">CO₂ Emissions</div><div class="trend down">-18% YoY</div></div>
+                    <div class="metric-card"><div class="icon">🎯</div><div class="value">${formatCurrency(totalPotential)}</div><div class="label">Savings Opportunity</div><div class="trend down">+12% identified</div></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">📊 Energy by Subsystem <span class="card-badge">Pareto</span></div>
+                        <div class="card-subtitle">HVAC is the primary driver at ${paretoData[0].value}%</div>
+                        <div class="chart-container"><canvas id="paretoBarChart"></canvas></div>
+                        <div style="margin-top:12px;font-size:13px;color:var(--text-secondary);">
+                            💡 <strong style="color:var(--primary);">${paretoData[0].name}</strong> — Save ${formatCurrency(paretoData[0].potential)} with BMS optimisation
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">${currentRole === 'CFO' ? '💰 Financial Impact' : '🌿 Carbon Footprint'}</div>
+                        <div class="card-subtitle">${currentRole === 'CFO' ? 'Annual cost distribution' : 'Emissions breakdown'}</div>
+                        <div class="chart-container"><canvas id="paretoPieChart"></canvas></div>
+                        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                            ${paretoData.slice(0,4).map(d => `
+                                <div style="display:flex;justify-content:space-between;padding:4px 10px;background:var(--primary-bg);border-radius:6px;font-size:12px;">
+                                    <span style="color:var(--text-secondary);">${d.name}</span>
+                                    <span style="font-weight:700;">${currentRole === 'CFO' ? formatCurrency(d.cost) : d.emissions+'t'}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">🧠 AI-Powered Recommendations <span class="card-badge">3 Insights</span></div>
+                    ${paretoData.slice(0,3).map((d,i) => `
+                        <div class="insight-item">
+                            <div class="num">${i+1}</div>
+                            <div class="content">
+                                <h4>${i===0 ? `Optimize ${d.name} performance` : i===1 ? `Upgrade ${d.name} systems` : `Implement smart controls for ${d.name}`}</h4>
+                                <p>${i===0 ? `Potential savings: ${formatCurrency(d.potential)} · Efficiency: ${d.efficiency}%` :
+                                    i===1 ? `Reduce waste by ${Math.round(d.value*0.15)}% · ROI: 18 months` :
+                                    `Automated scheduling saves ${Math.round(d.value*0.1)}% · Payback: 12 months`}</p>
+                            </div>
+                            <button class="action" onclick="showToast('Implementation plan generated', 'success')">View Plan →</button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function initParetoCharts() {
+            const barCtx = document.getElementById('paretoBarChart');
+            if (barCtx) {
+                chartInstances.paretoBar = new Chart(barCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: paretoData.map(d => d.name),
+                        datasets: [{ label: 'Energy %', data: paretoData.map(d => d.value),
+                            backgroundColor: ['#059669', '#10b981', '#34d399', '#6ee7b7', '#a7f3d0'], borderRadius: 4 }]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, indexAxis: 'y', plugins: { legend: { display: false } },
+                        scales: { x: { max: 100, grid: { color: 'rgba(0,0,0,0.05)' } }, y: { grid: { display: false } } } }
+                });
+            }
+            const pieCtx = document.getElementById('paretoPieChart');
+            if (pieCtx) {
+                const dataKey = currentRole === 'CFO' ? 'cost' : 'emissions';
+                chartInstances.paretoPie = new Chart(pieCtx, {
+                    type: 'pie',
+                    data: {
+                        labels: paretoData.map(d => d.name),
+                        datasets: [{ data: paretoData.map(d => d[dataKey]), backgroundColor: ['#059669', '#10b981',
+                                '#34d399', '#6ee7b7', '#a7f3d0'
+                            ], borderWidth: 0 }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: { position: 'bottom', labels: { usePointStyle: true, padding: 12, font: { size: 10 } } },
+                            tooltip: {
+                                callbacks: {
+                                    label: (ctx) => {
+                                        const total = ctx.dataset.data.reduce((a, b) => a + b, 0);
+                                        const pct = ((ctx.parsed / total) * 100).toFixed(0);
+                                        const val = currentRole === 'CFO' ? formatCurrency(ctx.parsed) : ctx.parsed +
+                                            't CO₂e';
+                                        return `${ctx.label}: ${val} (${pct}%)`;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+        }
+
+        // ============================================================
+        // 7.3 BUILDINGS PAGE
+        // ============================================================
+
+        function renderBuildings() {
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <div><h2 style="font-size:22px;font-weight:800;">🏢 Building Portfolio</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">${centres.length} shopping centres across South Africa</p></div>
+                    <button class="btn btn-primary" onclick="showToast('New centre form opened', 'info')"><i class="fas fa-plus"></i> Add Centre</button>
+                </div>
+
+                <div class="grid-3">
+                    ${centres.map(c => `
+                        <div class="card" style="cursor:pointer;" onclick="showToast('Loading ${c.name} details...', 'info')">
+                            <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+                                <div><h4 style="font-weight:700;font-size:16px;">${c.name}</h4>
+                                <p style="font-size:13px;color:var(--text-secondary);">${c.city}, ${c.province}</p></div>
+                                <span class="badge ${getStatusBadge(c.status)}">${c.status}</span>
+                            </div>
+                            <div style="margin-top:14px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;">
+                                <div style="background:var(--primary-bg);padding:8px;border-radius:6px;text-align:center;">
+                                    <div style="font-size:10px;color:var(--text-secondary);">Energy</div>
+                                    <div style="font-weight:700;font-size:15px;">${c.energy.toLocaleString()}</div>
+                                </div>
+                                <div style="background:var(--primary-bg);padding:8px;border-radius:6px;text-align:center;">
+                                    <div style="font-size:10px;color:var(--text-secondary);">EPC</div>
+                                    <div style="font-weight:700;font-size:15px;"><span class="badge ${getEpcColor(c.epc)}">${c.epc}</span></div>
+                                </div>
+                                <div style="background:var(--primary-bg);padding:8px;border-radius:6px;text-align:center;">
+                                    <div style="font-size:10px;color:var(--text-secondary);">Solar</div>
+                                    <div style="font-weight:700;font-size:15px;">${c.solar.capacity}MW</div>
+                                </div>
+                            </div>
+                            <div style="margin-top:10px;font-size:12px;color:var(--text-secondary);">
+                                Water: ${c.water.variance > 0 ? '⚠️ +' : '✅ '}${Math.abs(c.water.variance)}% vs baseline
+                                ${c.water.variance > 0 ? ' (above)' : ' (below)'}
+                            </div>
+                            <button style="margin-top:10px;width:100%;padding:6px;border:1px solid var(--border);border-radius:6px;background:transparent;cursor:pointer;font-weight:600;color:var(--primary);transition:all var(--transition);"
+                                    onmouseover="this.style.background='var(--primary-bg)'"
+                                    onmouseout="this.style.background='transparent'"
+                                    onclick="event.stopPropagation();showToast('Loading ${c.name} dashboard...', 'info')">
+                                View Details →
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // 7.4 SUSTAINABILITY PAGE
+        // ============================================================
+
+        function renderSustainability() {
+            const totalWater = centres.reduce((s, c) => s + c.water.actual, 0);
+            const totalWaste = centres.reduce((s, c) => s + c.waste.kg, 0);
+            const totalRecycled = centres.reduce((s, c) => s + c.waste.recycled, 0);
+            const recycleRate = Math.round((totalRecycled / totalWaste) * 100);
+            const totalSolar = centres.reduce((s, c) => s + c.solar.capacity, 0);
+
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <div><h2 style="font-size:22px;font-weight:800;">🌿 Sustainability Performance</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">Q1 FY2025 · Water, Solar, Waste & Carbon</p></div>
+                    <button class="btn btn-primary" onclick="showToast('Sustainability report generated', 'success')"><i class="fas fa-download"></i> Download Report</button>
+                </div>
+
+                <div class="grid-4">
+                    <div class="metric-card green"><div class="icon">💧</div><div class="value">${(totalWater/1000).toFixed(1)}k</div><div class="label">Water (kL)</div><div class="trend down">↓ 7.36% vs target</div></div>
+                    <div class="metric-card"><div class="icon">☀️</div><div class="value">${totalSolar}MW</div><div class="label">Solar Capacity</div><div class="trend down">Target: 20.59MW</div></div>
+                    <div class="metric-card"><div class="icon">♻️</div><div class="value">${recycleRate}%</div><div class="label">Recycling Rate</div><div class="trend down">Target: 51%</div></div>
+                    <div class="metric-card"><div class="icon">🌿</div><div class="value">15,420t</div><div class="label">CO₂ Emissions</div><div class="trend down">↓ 4% YoY</div></div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">💧 Water Performance <span class="card-badge">Q1 FY25</span></div>
+                        <div class="card-subtitle">Actual vs baseline consumption</div>
+                        <div class="chart-container"><canvas id="waterChart"></canvas></div>
+                    </div>
+                    <div class="card">
+                        <div class="card-title">♻️ Waste Management <span class="card-badge">63% Recycled</span></div>
+                        <div class="card-subtitle">Zero to landfill target: 2030</div>
+                        <div class="chart-container"><canvas id="wasteChart"></canvas></div>
+                    </div>
+                </div>
+
+                <div class="card">
+                    <div class="card-title">☀️ Solar Performance <span class="card-badge">15.49 MW</span></div>
+                    <div class="card-subtitle">Total savings: R35.4M · 99% forecast achievement</div>
+                    <div class="table-container">
+                        <table class="table">
+                            <thead><tr><th>Centre</th><th>Capacity</th><th>Forecast (MWh)</th><th>Actual (MWh)</th><th>Efficiency</th></tr></thead>
+                            <tbody>${centres.filter(c => c.solar.capacity > 0).map(c => `
+                                <tr>
+                                    <td><strong>${c.name}</strong></td>
+                                    <td>${c.solar.capacity} MW</td>
+                                    <td>${c.solar.forecast}</td>
+                                    <td>${c.solar.actual}</td>
+                                    <td><span class="badge ${c.solar.efficiency >= 90 ? 'badge-success' : c.solar.efficiency >= 70 ? 'badge-warning' : 'badge-danger'}">${c.solar.efficiency}%</span></td>
+                                </tr>
+                            `).join('')}</tbody>
+                        </table>
+                    </div>
+                </div>
+            `;
+        }
+
+        function initSustainabilityCharts() {
+            const waterCtx = document.getElementById('waterChart');
+            if (waterCtx) {
+                chartInstances.water = new Chart(waterCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: centres.map(c => c.name),
+                        datasets: [
+                            { label: 'Baseline (kL)', data: centres.map(c => c.water.baseline), backgroundColor: '#94a3b8',
+                                borderRadius: 4 },
+                            { label: 'Actual (kL)', data: centres.map(c => c.water.actual), backgroundColor: '#059669',
+                                borderRadius: 4 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top',
+                                labels: { usePointStyle: true } } }, scales: { y: { beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+                });
+            }
+            const wasteCtx = document.getElementById('wasteChart');
+            if (wasteCtx) {
+                chartInstances.waste = new Chart(wasteCtx, {
+                    type: 'bar',
+                    data: {
+                        labels: centres.map(c => c.name),
+                        datasets: [
+                            { label: 'Waste Produced (kg)', data: centres.map(c => c.waste.kg),
+                                backgroundColor: '#f59e0b', borderRadius: 4 },
+                            { label: 'Recycled (kg)', data: centres.map(c => c.waste.recycled),
+                                backgroundColor: '#059669', borderRadius: 4 }
+                        ]
+                    },
+                    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'top',
+                                labels: { usePointStyle: true } } }, scales: { y: { beginAtZero: true,
+                                grid: { color: 'rgba(0,0,0,0.05)' } }, x: { grid: { display: false } } } }
+                });
+            }
+        }
+
+        // ============================================================
+        // 7.5 ISO COMPLIANCE PAGE
+        // ============================================================
+
+        function renderISO() {
+            const done = isoMilestones.filter(m => m.done).length;
+            const total = isoMilestones.length;
+            const pct = Math.round((done / total) * 100);
+
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <div><h2 style="font-size:22px;font-weight:800;">📋 ISO Compliance</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">ISO 14001:2015 · Environmental Management System</p></div>
+                    <div style="display:flex;gap:12px;">
+                        <span class="badge badge-info">Pilot: Cresta</span>
+                        <span class="badge badge-success">Target: April 2025</span>
+                    </div>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">📊 ISO 14001 Progress <span class="card-badge">${pct}%</span></div>
+                        <div style="margin:16px 0;">
+                            <div style="height:12px;background:#e2e8f0;border-radius:6px;overflow:hidden;">
+                                <div style="height:100%;width:${pct}%;background:linear-gradient(90deg,#059669,#10b981);border-radius:6px;transition:width 0.6s;"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;margin-top:6px;font-size:12px;color:var(--text-secondary);">
+                                <span>${done}/${total} milestones</span>
+                                <span>${pct}% Complete</span>
+                            </div>
+                        </div>
+                        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px;">
+                            ${isoMilestones.map(m => `
+                                <div style="display:flex;align-items:center;gap:8px;padding:6px 10px;background:${m.done ? 'var(--primary-bg)' : '#f8f9fa'};border-radius:6px;font-size:12px;">
+                                    <i class="fas ${m.done ? 'fa-check-circle' : 'fa-circle'}" style="color:${m.done ? '#059669' : '#cbd5e1'};"></i>
+                                    <span style="${m.done ? 'color:var(--text);' : 'color:var(--text-secondary);'}">${m.name}</span>
+                                    <span style="margin-left:auto;font-size:10px;color:var(--text-light);">${m.date}</span>
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">📋 ISO 9001:2015 <span class="card-badge">Planning</span></div>
+                            <div class="card-subtitle">Quality Management System · Target: Sep 2025</div>
+                            <div style="height:8px;background:#e2e8f0;border-radius:4px;overflow:hidden;margin:12px 0;">
+                                <div style="height:100%;width:25%;background:#2563eb;border-radius:4px;"></div>
+                            </div>
+                            <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--text-secondary);">
+                                <span>Initial Assessment ✅</span>
+                                <span>GAP Analysis ⏳</span>
+                                <span>Certification 🔜</span>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">📄 EMS Procedures <span class="card-badge">22 Documents</span></div>
+                            <div style="max-height:200px;overflow-y:auto;font-size:12px;color:var(--text-secondary);">
+                                ${['Definition of Roles', 'Environmental Policy', 'Risk Assessment', 'Training & Competence', 'Document Control', 'Communication', 'Carbon Assessment', 'Waste Management', 'Water Management', 'Energy Management', 'Air Quality', 'Noise Monitoring', 'Biodiversity', 'Pest Control', 'Green Building Policy', 'Emergency Response', 'Internal Audit', 'Monitoring & Measurement', 'Management Review', 'Non-conformance'].map(p => `
+                                    <div style="display:flex;align-items:center;gap:6px;padding:3px 0;border-bottom:1px solid #f1f5f9;">
+                                        <i class="fas fa-file-alt" style="color:#059669;font-size:10px;"></i>
+                                        <span>${p}</span>
+                                    </div>
+                                `).join('')}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // 7.6 NET ZERO PAGE
+        // ============================================================
+
+        function renderNetZero() {
+            return `
+                <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:12px;margin-bottom:20px;">
+                    <div><h2 style="font-size:22px;font-weight:800;">🌍 Net Zero & ESG Strategy</h2>
+                    <p style="color:var(--text-secondary);font-size:14px;">Progress against 2050 Net Zero target</p></div>
+                    <span class="badge badge-primary">18% Achieved</span>
+                </div>
+
+                <div class="grid-2">
+                    <div class="card">
+                        <div class="card-title">🎯 Net Zero Roadmap</div>
+                        ${netZeroMilestones.map(m => `
+                            <div style="margin-bottom:16px;">
+                                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;">
+                                    <span style="font-weight:700;font-size:15px;">${m.year}</span>
+                                    <span style="font-size:13px;color:var(--text-secondary);">${m.target}</span>
+                                    <span class="badge ${m.status === 'On Track' ? 'badge-success' : m.status === 'In Progress' ? 'badge-warning' : 'badge-info'}">${m.status}</span>
+                                </div>
+                                <div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;">
+                                    <div style="height:100%;width:${parseInt(m.achieved) || 15}%;background:${m.status === 'On Track' ? '#059669' : m.status === 'In Progress' ? '#f59e0b' : '#94a3b8'};border-radius:3px;"></div>
+                                </div>
+                                <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--text-secondary);margin-top:2px;">
+                                    <span>Achieved: ${m.achieved}</span>
+                                    <span>${m.status}</span>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+
+                    <div>
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">🌿 Environmental <span class="card-badge">45%</span></div>
+                            <div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin:8px 0;">
+                                <div style="height:100%;width:45%;background:#059669;border-radius:3px;"></div>
+                            </div>
+                            <div style="font-size:13px;color:var(--text-secondary);">
+                                <div>💧 Water Efficiency: <span class="badge badge-warning">7.36% above target</span></div>
+                                <div>☀️ Solar Expansion: <span class="badge badge-info">15.49 / 20.59 MW</span></div>
+                                <div>♻️ Waste Diversion: <span class="badge badge-warning">63% recycled</span></div>
+                            </div>
+                        </div>
+
+                        <div class="card" style="margin-bottom:16px;">
+                            <div class="card-title">👥 Social <span class="card-badge">30%</span></div>
+                            <div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin:8px 0;">
+                                <div style="height:100%;width:30%;background:#2563eb;border-radius:3px;"></div>
+                            </div>
+                            <div style="font-size:13px;color:var(--text-secondary);">
+                                <div>🏆 B-BBEE Level: <span class="badge badge-success">Level 2</span></div>
+                                <div>👩‍💼 Women in Leadership: <span class="badge badge-warning">44%</span></div>
+                            </div>
+                        </div>
+
+                        <div class="card">
+                            <div class="card-title">⚖️ Governance <span class="card-badge">60%</span></div>
+                            <div style="height:6px;background:#e2e8f0;border-radius:3px;overflow:hidden;margin:8px 0;">
+                                <div style="height:100%;width:60%;background:#7c3aed;border-radius:3px;"></div>
+                            </div>
+                            <div style="font-size:13px;color:var(--text-secondary);">
+                                <div>📋 ISO 14001: <span class="badge badge-warning">${Math.round(isoMilestones.filter(m=>m.done).length/isoMilestones.length*100)}%</span></div>
+                                <div>📊 ESG Reporting: <span class="badge badge-success">GRESB Ready</span></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // ============================================================
+        // 8. EVENT BINDING
+        // ============================================================
+
+        $$('.sidebar-nav-item').forEach(el => {
+            el.addEventListener('click', () => setActiveView(el.dataset.view));
+        });
+
+        roleSelect.addEventListener('change', function() {
+            currentRole = this.value;
+            userAvatar.textContent = getInitials(currentRole);
+            userName.textContent = currentRole;
+            renderPage(currentView);
+            showToast(`Switched to ${currentRole} view`, 'info');
+        });
+
+        menuToggle.addEventListener('click', toggleMobileMenu);
+        overlay.addEventListener('click', closeMobileMenu);
+
+        actionBtn.addEventListener('click', function() {
+            const actions = {
+                overview: () => showToast('Exporting portfolio report...', 'success'),
+                pareto: () => showToast('Re-running Pareto analysis...', 'info'),
+                buildings: () => showToast('Opening add centre form...', 'info'),
+                sustainability: () => showToast('Downloading sustainability report...', 'success'),
+                iso: () => showToast('Uploading evidence...', 'info'),
+                netzero: () => showToast('Viewing roadmap...', 'info'),
+            };
+            if (actions[currentView]) actions[currentView]();
+        });
+
+        // WhatsApp
+        waFab.addEventListener('click', toggleWA);
+        waClose.addEventListener('click', toggleWA);
+        waSend.addEventListener('click', sendWAMessage);
+        waInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') sendWAMessage(); });
+        waCentreFilter.addEventListener('change', renderWAMessages);
+        waPriorityFilter.addEventListener('change', renderWAMessages);
+
+        // Toast click to dismiss
+        toast.addEventListener('click', () => toast.classList.remove('show'));
+
+        // ============================================================
+        // 9. INIT
+        // ============================================================
+
+        userAvatar.textContent = getInitials(currentRole);
+        userName.textContent = currentRole;
+        setActiveView('overview');
+
+        // Expose functions globally
+        window.setActiveView = setActiveView;
+        window.showToast = showToast;
+        window.renderPage = renderPage;
+        window.toggleWA = toggleWA;
+        window.sendWAMessage = sendWAMessage;
+        window.formatCurrency = formatCurrency;
+
+        console.log('🌿 GreenBDG Pareto Platform initialized successfully!');
+        console.log(`🏢 ${centres.length} shopping centres loaded`);
+        console.log(`⚡ Total energy: ${centres.reduce((s,c)=>s+c.energy,0).toLocaleString()} kWh`);
+        console.log(`💧 Total water: ${centres.reduce((s,c)=>s+c.water.actual,0).toLocaleString()} kL`);
+        console.log(`☀️ Total solar: ${centres.reduce((s,c)=>s+c.solar.capacity,0)} MW`);
+        console.log(`♻️ Recycling rate: ${Math.round(centres.reduce((s,c)=>s+c.waste.recycled,0)/centres.reduce((s,c)=>s+c.waste.kg,0)*100)}%`);
+    </script>
 </body>
 </html>
